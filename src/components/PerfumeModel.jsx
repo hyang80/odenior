@@ -63,7 +63,7 @@ function smoothNormals(geometry, angle) {
   geometry.userData.smoothed = true;
 }
 
-export default function PerfumeModel({ src, poster, alt, className, materials, liquid }) {
+export default function PerfumeModel({ src, poster, alt, className, materials, liquid, framing }) {
   const viewerRef = useRef(null);
   const [ready, setReady] = useState(() => typeof customElements !== 'undefined' && !!customElements.get('model-viewer'));
 
@@ -130,7 +130,45 @@ export default function PerfumeModel({ src, poster, alt, className, materials, l
     };
   }, [ready, liquid]);
 
+  // model-viewer turns the requested field of view into the camera's by a factor that depends on
+  // each model's own bounds (and with zoom disabled it pins it to its auto value unless min = max
+  // are set), so one `field-of-view` still renders differently sized knots at slightly different
+  // scales. Once the model is in, pin min = max = request and nudge it until the camera's
+  // effective FOV is exactly framing.fov.
+  const fovTarget = framing ? parseFloat(framing.fov) : null;
+  useEffect(() => {
+    const mv = viewerRef.current;
+    if (!ready || !mv || !fovTarget) return undefined;
+    let raf = 0;
+    let tries = 0;
+    let requested = fovTarget;
+    const calibrate = () => {
+      const got = mv.getFieldOfView();
+      if (Math.abs(got - fovTarget) < 0.005 || tries++ > 6) return;
+      requested *= fovTarget / got;
+      mv.minFieldOfView = `${requested}deg`;
+      mv.maxFieldOfView = `${requested}deg`;
+      mv.fieldOfView = `${requested}deg`;
+      mv.jumpCameraToGoal();
+      raf = requestAnimationFrame(() => requestAnimationFrame(calibrate));
+    };
+    const start = () => {
+      tries = 0;
+      raf = requestAnimationFrame(calibrate);
+    };
+    if (mv.loaded) start();
+    mv.addEventListener('load', start);
+    return () => {
+      cancelAnimationFrame(raf);
+      mv.removeEventListener('load', start);
+    };
+  }, [ready, fovTarget]);
+
   if (!ready) return <img src={poster} alt={alt} className={className} />;
+  // `framing` ({ target, radius, fov: the camera's effective vertical FOV }) pins the camera so
+  // several models render at one scale;
+  // without it the camera auto-frames each model to its own bounds
+  const radius = framing?.radius ?? '120%';
 
   return (
     <model-viewer
@@ -148,9 +186,11 @@ export default function PerfumeModel({ src, poster, alt, className, materials, l
       auto-rotate=""
       auto-rotate-delay="1500"
       rotation-per-second="18deg"
-      camera-orbit="0deg 80deg 120%"
-      min-camera-orbit="auto 0deg 120%"
-      max-camera-orbit="auto 180deg 120%"
+      camera-orbit={`0deg 80deg ${radius}`}
+      min-camera-orbit={`auto 0deg ${radius}`}
+      max-camera-orbit={`auto 180deg ${radius}`}
+      camera-target={framing?.target}
+      field-of-view={framing?.fov}
       environment-image="/models/studio-env-v2.hdr"
       tone-mapping="neutral"
       exposure="1.3"

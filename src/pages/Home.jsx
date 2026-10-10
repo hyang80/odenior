@@ -3,68 +3,12 @@ import { useVariant } from '../hooks/useVariant.js';
 import { useNav } from '../hooks/useNav.js';
 import LineDraw from '../components/LineDraw.jsx';
 import CurtainMist, { FOG_CLEAR } from '../components/CurtainMist.jsx';
-import ProductCard from '../components/ProductCard.jsx';
+import OddShowcase from '../components/OddShowcase.jsx';
 import Footer from '../components/Footer.jsx';
 import { OPENING_DONE_EVENT } from '../components/Opening.jsx';
 import { usePageRevealed } from '../hooks/useReveal.js';
 import '../styles/home.css';
 
-const CARDS = [
-  {
-    key: 'nerile',
-    name: 'NeRilE',
-    sub: 'The First Embrace',
-    img: '/assets/f10b9.png',
-    imgBox: { left: 83, width: 240 },
-    logo: '/assets/38aa3.svg',
-    logoHover: '/assets/57235.svg',
-    hover: (
-      <>
-        <div className="pc-rect pc-rect-nerile">
-          <img src="/assets/a1e42.png" alt="" className="fill" />
-        </div>
-        <img src="/assets/38784.svg" alt="" className="abs pc-symbol pc-symbol-nerile" width="135" height="136.607" />
-      </>
-    ),
-  },
-  {
-    key: 'aieule',
-    name: 'AiEULE',
-    sub: 'The Last Heart',
-    img: '/assets/045b7.png',
-    imgBox: { left: 89, width: 229 },
-    logo: '/assets/31cf5.svg',
-    logoHover: '/assets/da7b3.svg',
-    hover: (
-      <>
-        <div className="pc-rect pc-rect-aieule">
-          <img src="/assets/a1e42.png" alt="" className="fill" />
-          <img src="/assets/c5e2d.png" alt="" className="fill pc-rect-grain" />
-        </div>
-        <div className="abs pc-symbol-aieule">
-          <img src="/assets/f7e72.svg" alt="" width="140" height="132.797" />
-        </div>
-      </>
-    ),
-  },
-  {
-    key: 'amant',
-    name: 'AMANT',
-    sub: 'The Other Half',
-    img: '/assets/97f19.png',
-    imgBox: { left: 88, width: 230 },
-    logo: '/assets/31cf5.svg',
-    logoHover: '/assets/da7b3.svg',
-    hover: (
-      <>
-        <div className="pc-rect pc-rect-amant">
-          <img src="/assets/7caa3.png" alt="" className="fill" />
-        </div>
-        <img src="/assets/951da.svg" alt="" className="abs pc-symbol-amant" width="137" height="135" />
-      </>
-    ),
-  },
-];
 
 const HERO_VIDEO_RATE = 2;
 
@@ -208,11 +152,9 @@ function Intro({ shown }) {
             <br />
           </p>
           <p className="intro-l50 pre">시간과 거리 너머에도 사라지지 않고 남아 있는 존재의 흔적</p>
-          <p className="intro-l60 pre">{'​'}</p>
           <p className="intro-l50 pre">
             ODENOIR은 그 흔적을 감각으로 복원하고,
-            <br />
-            부재를 하나의 향으로 기록합니다.
+            <span className="intro-l37">부재를 하나의 향으로 기록합니다.</span>
           </p>
         </div>
         <div className={`abs intro-line${line.active ? ' is-active' : ''}`} {...line.bind}>
@@ -274,24 +216,26 @@ function OurStory() {
   );
 }
 
+// ODD SERIES showcase on a white band (136:3293, y 2279–3583): Frame 121 at y 2409, VIEW ALL at
+// y 3246 (band coordinates = page − 2283, the end of our story)
 function OddSeries() {
   const nav = useNav();
+  const viewAll = useVariant();
   return (
-    <section className="section odd-series">
-      <div className="canvas odd-canvas">
-        <h2 className="abs odd-title fw-500">ODD SERIES</h2>
-        <p className="abs odd-sub fw-500">EXPLORE OUR ICONIC PERFUMES</p>
-        <div className="odd-cards">
-          {/* Each card opens the product page on its own bottle in ODD SERIES (Figma 92:3258) */}
-          {CARDS.map((c) => (
-            <ProductCard
-              key={c.key}
-              data={c}
-              href={`/product#${c.key}`}
-              onOpen={() => nav('/product', 220, { series: c.key })}
-            />
-          ))}
-        </div>
+    <section className="section odd-band">
+      <div className="canvas odd-band-canvas">
+        <OddShowcase className="abs odd-band-showcase" />
+        <a
+          href="/product"
+          className={`abs view-all${viewAll.active ? ' is-active' : ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            nav('/product', 200);
+          }}
+          {...viewAll.bind}
+        >
+          <span className="fw-500">{'VIEW ALL  -->'}</span>
+        </a>
       </div>
     </section>
   );

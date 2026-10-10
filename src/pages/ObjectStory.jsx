@@ -4,7 +4,7 @@ import { useCurtainSnap } from '../hooks/useCurtainSnap.js';
 import { usePageRevealed } from '../hooks/useReveal.js';
 import '../styles/object.css';
 
-/* Figma 1:273 "Frame 105" — BRAND / Object Story (1440×3109) */
+/* Figma 1:273 "Frame 105" — BRAND / Object Story (1440×2996) */
 function KnotZone({ className, img, alt }) {
   // N_obj / i_obj / A_obj: enter → smart animate 800ms ease-out; leave +0.75s → dissolve.
   // The hover target is the obj frame itself (Figma size). It activates only on real pointer
@@ -41,7 +41,6 @@ export default function ObjectStory() {
           <img src="/assets/7e9ca.png" alt="" />
         </div>
         <div className={`canvas object-hero-canvas${revealed ? ' is-revealed' : ''}`}>
-          <div className="abs object-hero-patch" />
           <p className="abs object-hero-copy object-hero-copy-top">
             Even
             <br />

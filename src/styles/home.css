@@ -165,7 +165,7 @@
 }
 .intro-text {
   left: 719.5px;
-  top: 243px;
+  top: 270px;
   transform: translateX(-50%);
   text-align: center;
   color: #000;
@@ -178,16 +178,17 @@
   line-height: 60px;
 }
 .intro-lead .fw-700 {
+  font-size: 28px;
   color: #39312b;
 }
 .intro-l50 {
-  font-size: 18px;
+  font-size: 22px;
   line-height: 50px;
   font-weight: 400;
 }
-.intro-l60 {
-  font-size: 18px;
-  line-height: 50px;
+.intro-l37 {
+  display: block;
+  line-height: 37px;
 }
 .intro-line {
   left: -98px;
@@ -298,14 +299,21 @@
   opacity: 1;
 }
 
-/* --- ODD SERIES 1:55 (top 2390, 1440×1007) --- */
-.odd-series {
-  height: calc(1007px * var(--zoom));
-  margin-top: calc(107px * var(--zoom));
+/* --- ODD SERIES showcase band — white rect 136:3293 from the end of our story (2283) to the
+   split (3385); Frame 121 (OddShowcase) at 2409, VIEW ALL 1:61 at 3246 --- */
+.odd-band {
+  height: calc(1102px * var(--zoom));
+  background: #fff;
 }
-.odd-canvas {
-  height: 1007px;
+.odd-band-canvas {
+  height: 1102px;
 }
+.odd-band-showcase {
+  left: 0;
+  top: 126px;
+}
+
+/* ODD SERIES cards (1:55) — used on the product page (Product.jsx) */
 .odd-title {
   left: 86px;
   top: 106px;
@@ -449,7 +457,31 @@
 .product-card.is-active .pc-sub,
 .product-card.is-active .pc-desc { color: #a6a6a6; }
 
-/* --- Split row: Frame 97 (734×832) + perfume-mov (1478×832 @ x734) at top 3583 --- */
+.view-all {
+  left: 1153px;
+  top: 963px;
+  width: 195px;
+  height: 62px;
+  display: block;
+  background: rgba(181, 160, 146, 0);
+  transition: background-color 220ms var(--ease-in), color 220ms var(--ease-in);
+  color: #000;
+}
+.view-all span {
+  position: absolute;
+  left: 104.5px;
+  top: 27px;
+  transform: translateX(-50%);
+  font-size: 24px;
+  line-height: 8px;
+  white-space: pre;
+}
+.view-all.is-active {
+  background: #b5a092;
+  color: #fff;
+}
+
+/* --- Split row: Frame 97 (734×832) + perfume-mov (1478×832 @ x734) at top 3385 --- */
 .split {
   height: calc(832px * var(--zoom));
 }
@@ -545,14 +577,13 @@
   white-space: nowrap;
 }
 
-/* --- Footer 1:203 (top 4538, 483px, #f5f4f3) --- */
+/* --- Footer 1:203 (1512×810 @ 4088, no fill — the page's #f8f8f7). Its upper part sits behind
+   the split row, so the section starts where the split ends (4217): offsets are Figma − 129. --- */
 .site-footer {
-  height: calc(483px * var(--zoom));
-  margin-top: calc(123px * var(--zoom));
-  background: #f5f4f3;
+  height: calc(717px * var(--zoom));
 }
 .footer-canvas {
-  height: 483px;
+  height: 717px;
   font-size: 15px;
   font-weight: 500;
   line-height: 25px;
@@ -563,11 +594,11 @@
 }
 .footer-logo {
   left: 89px;
-  top: 72.9px;
-  width: 353px;
-  height: 97.7577px;
+  top: 276px;
+  width: 192px;
+  height: 53.172px;
 }
-.footer-links .abs { top: 196px; }
+.footer-links .abs { top: 360px; }
 .fl-home { left: 89px; }
 .fl-bar-1 { left: 118px; }
 .fl-terms { left: 147px; }
@@ -575,36 +606,27 @@
 .fl-privacy { left: 244px; }
 .fl-bar-3 { left: 361px; }
 .fl-guide { left: 390px; }
-.footer-links a:hover { text-decoration: underline; }
+.footer-links a:hover,
+.footer-top:hover { text-decoration: underline; }
 .footer-info {
   left: 89px;
-  top: 255px;
-}
-.footer-talk {
-  left: 1041px;
-  top: 248px;
-  width: 291px;
-  height: 63px;
-}
-.footer-talk-pill {
-  position: absolute;
-  inset: 0;
-  border: 2px solid #b5a092;
-  border-radius: 500px;
-  transition: background-color 200ms var(--ease-out);
-}
-.footer-talk-label {
-  position: absolute;
-  left: 85px;
-  top: 19px;
-  font-size: 32px;
-  line-height: 25px;
-  color: #b5a092;
-  white-space: nowrap;
+  top: 415px;
 }
 .footer-cs {
-  left: 1046px;
-  top: 330px;
+  left: 1071px;
+  top: 490px;
+}
+.footer-copy {
+  left: 89px;
+  top: 621px;
+  margin: 0;
+}
+.footer-copy .fc-name { font-size: 16px; }
+.footer-copy .fc-year { font-size: 14px; }
+.footer-top {
+  left: 1333px;
+  top: 621px;
+  color: inherit;
 }
 
 /* ===== Mobile / tablet (< 900px): stacked flow layout ===== */
@@ -696,7 +718,6 @@
   }
   .intro-lead { font-size: 20px; line-height: 40px; }
   .intro-l50 { font-size: 15px; line-height: 32px; }
-  .intro-l60 { line-height: 24px; }
   .intro-line {
     left: -40%;
     top: 0;
@@ -736,19 +757,19 @@
     object-fit: cover;
   }
 
-  .odd-series {
+  .odd-band,
+  .odd-band-canvas {
     height: auto;
-    margin-top: 72px;
   }
-  .odd-canvas {
-    height: auto;
-    padding: 0 20px 72px;
+  .odd-band-canvas {
+    padding: 56px 20px 72px;
     display: flex;
     flex-direction: column;
   }
   .odd-title,
   .odd-sub,
-  .odd-cards {
+  .odd-cards,
+  .view-all {
     position: relative;
     left: auto;
     top: auto;
@@ -779,6 +800,10 @@
   .pc-name { font-size: 22px; }
   .pc-sub { font-size: 15px; }
   .pc-desc { font-size: 16px; }
+  .view-all {
+    align-self: flex-end;
+    margin-top: 32px;
+  }
 
   .split {
     height: auto;
@@ -825,7 +850,6 @@
 
   .site-footer {
     height: auto;
-    margin-top: 72px;
   }
   .footer-canvas {
     height: auto;
@@ -843,7 +867,7 @@
     white-space: normal;
   }
   .footer-logo {
-    width: 220px;
+    width: 150px;
     height: auto;
   }
   .footer-links {
@@ -851,14 +875,7 @@
     gap: 10px;
   }
   .footer-links .abs { top: auto; }
-  .footer-talk {
-    width: 220px;
-    height: 52px;
-  }
-  .footer-talk-label {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
+  .footer-top {
+    align-self: flex-end;
   }
 }

@@ -65,110 +65,18 @@
   white-space: nowrap;
 }
 
-/* ODD SERIES — Frame 121 (1440×810 @ y1003 in Frame 118), white band y889–1927 */
-.product-series {
+/* ODD SERIES cards (1:55) — band y 889–1927 (the cards frame is 1007 tall, then 31px to the
+   object row); card styles live in home.css */
+.product-odd {
   height: calc(1038px * var(--zoom));
-  background: #fff;
 }
-.product-series-canvas {
+.product-odd-canvas {
   height: 1038px;
 }
-/* Offsets below are Frame 121 coordinates + 114px (its top within the band) */
-.series-title {
-  left: 80px;
-  top: 217px;
-  font-size: 72px;
-  line-height: 75px;
-  white-space: nowrap;
-  font-weight: 500;
-  color: #000;
-}
-.series-desc {
-  left: 80px;
-  top: 387px;
-  font-size: 22px;
-  line-height: 28px;
-  font-weight: 500;
-  color: #424242;
-  white-space: nowrap;
-}
-/* DF-N / VA-Ai / VA-Am stacked in place; switching swaps instantly (no transition) */
-.series-variant {
-  position: absolute;
-  left: 0;
-  top: 114px;
-  width: 1440px;
-  height: 810px;
-  visibility: hidden;
-}
-.series-variant.is-active {
-  visibility: visible;
-}
-/* AiEULE slot: <model-viewer> (PerfumeModel) in place of image 514 */
-/* The canvas is 1.4× the slot (centred) and the camera sits 1.4× further back (PerfumeModel
-   radius 120% vs 86%), so the bottle keeps the slot's size but has room to tilt without clipping */
-.series-model.fill {
-  inset: -20%;
-  width: 140%;
-  height: 140%;
-}
-.series-model {
-  display: block;
-  background: transparent;
-  --poster-color: transparent;
-  object-fit: cover;
-  cursor: grab;
-}
-.series-model:active {
-  cursor: grabbing;
-}
-/* Ellipse (7px) + 13px label */
-.series-tag {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 0;
-  font-size: 13px;
-  line-height: normal;
-  font-weight: 500;
-  color: #000;
-  white-space: nowrap;
-}
-.series-label {
-  left: 80px;
-  top: 604px;
-  font-weight: 500;
-  color: #000;
-  white-space: nowrap;
-}
-.sl-name { font-size: 48px; line-height: normal; }
-.sl-sub { color: #828282; }
-.sl-sub span:first-child { font-size: 24px; line-height: 40px; }
-.sl-gap { font-size: 16px; line-height: 24px; }
-.sl-size { font-size: 20px; line-height: normal; }
-/* "click the odd object" (132:3242, @1110,665) above the knot buttons */
-.series-hint {
-  left: 1110px;
-  top: 779px;
-  margin: 0;
-  font-size: 15px;
-  line-height: 25px;
-  font-weight: 500;
-  color: #b5b5b5;
-  white-space: nowrap;
-}
-.series-buttons {
-  left: 1098px;
-  top: 804px;
-  width: 244px;
-  height: 60px;
-  z-index: 1;
-}
-.series-btn {
-  position: absolute;
-  top: 0;
-  width: 60px;
-  height: 60px;
+@media (min-width: 900px) {
+  .product-odd .odd-cards .product-card:nth-child(3) {
+    margin-top: -4px;
+  }
 }
 
 /* ODD OBJECT SERIES row (820px) */
@@ -294,57 +202,14 @@
   .ps-l51,
   .ps-l38 { font-size: 14px; line-height: 26px; }
   .product-record { font-size: 18px; line-height: 32px; }
-  .product-series,
-  .product-series-canvas {
+  .product-odd,
+  .product-odd-canvas {
     height: auto;
   }
-  .product-series-canvas {
-    position: relative;
-    width: 100%;
-    padding: 56px 20px 40px;
-  }
-  .series-title,
-  .series-desc {
-    position: relative;
-    left: auto;
-    top: auto;
-  }
-  .series-title { font-size: 36px; line-height: 44px; }
-  .series-desc { margin-top: 16px; font-size: 15px; line-height: 22px; white-space: normal; }
-  .series-variant {
-    position: relative;
-    top: auto;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 3 / 4;
-    margin-top: 24px;
-  }
-  .series-variant:not(.is-active) {
-    position: absolute;
-    left: 20px;
-    right: 20px;
-    width: auto;
-  }
-  .series-variant .series-img {
-    left: 22% !important;
-    top: 0 !important;
-    width: 56% !important;
-    height: 72% !important;
-  }
-  .series-tag,
-  .series-hint { display: none; }
-  .series-label { left: 0; top: auto; bottom: 0; }
-  .sl-name { font-size: 24px; }
-  .sl-sub span:first-child { font-size: 16px; line-height: 26px; }
-  .sl-gap { display: none; }
-  .sl-size { font-size: 14px; }
-  .series-buttons {
-    position: relative;
-    left: auto;
-    top: auto;
-    margin: 20px 0 0 auto;
-    transform: scale(0.75);
-    transform-origin: right center;
+  .product-odd-canvas {
+    padding: 56px 20px 72px;
+    display: flex;
+    flex-direction: column;
   }
   .product-object,
   .product-object-canvas {

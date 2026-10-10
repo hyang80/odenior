@@ -1,19 +1,23 @@
-/* ===== Object Story (Figma 1:273 "Frame 105", 1440×3109) ===== */
+/* ===== Object Story (Figma 1:273 "Frame 105", 1440×2996) ===== */
 .page-object {
   background-color: #fff;
-  min-height: calc(3109px * var(--zoom));
+  min-height: calc(2996px * var(--zoom));
 }
 
-/* Hero — Frame 106 (1440×921), pinned so Frame 118 can slide over it */
+/* Hero — Frame 106 (1:286, 1440×810), pinned so Frame 118 can slide over it. Its photo frame
+   (134:3250) is 921px tall from y -42, so it overflows the hero and is clipped. */
 .object-hero {
-  height: calc(921px * var(--zoom));
+  height: calc(810px * var(--zoom));
   position: sticky;
-  top: min(0px, calc(100vh - 921px * var(--zoom)));
+  top: min(0px, calc(100vh - 810px * var(--zoom)));
   z-index: 0;
 }
 .object-hero-img {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: calc(-42px * var(--zoom));
+  height: calc(921px * var(--zoom));
   overflow: hidden;
 }
 .object-hero-img img {
@@ -26,14 +30,7 @@
   object-fit: cover;
 }
 .object-hero-canvas {
-  height: 921px;
-}
-.object-hero-patch {
-  left: 1285px;
-  top: 836px;
-  width: 68px;
-  height: 85px;
-  background: #e8e5dd;
+  height: 810px;
 }
 /* Figma 58:2474 / 58:2475 — live text (was image), fades in together on arrival */
 .object-hero-copy {
@@ -58,26 +55,25 @@
 }
 .object-hero-copy-bottom {
   left: 1339px;
-  top: 737px;
+  top: 622px;
   transform: translateX(-100%);
   text-align: right;
 }
 
-/* Frame 118 (59:2483) — 1434×2185 at (3, 921) in Frame 105, white + beige gradient. The cover
-   spans the full width from y 921 so the hero never peeks out; canvas coordinates below are
-   Frame 105 page coordinates minus 921 (i.e. Frame 118 coordinates + 3px in x). */
+/* Frame 118 (59:2483) — 1440×2185 at (0, 810) in Frame 105, white + beige gradient; canvas
+   coordinates below are Frame 118 coordinates. */
 .object-body {
-  height: calc(2188px * var(--zoom));
+  height: calc(2186px * var(--zoom));
   position: relative;
   z-index: 1;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0) 25.634%, rgba(217, 186, 155, 0.2) 85.446%), #fff;
   box-shadow: 0 -24px 60px rgba(30, 25, 21, 0.12);
 }
 .object-body-canvas {
-  height: 2188px;
+  height: 2186px;
 }
 .object-lead {
-  left: 87px;
+  left: 84px;
   top: 106px;
   font-size: 36px;
   line-height: 52px;
@@ -86,7 +82,7 @@
   white-space: nowrap;
 }
 .object-intro {
-  left: 689px;
+  left: 686px;
   top: 123px;
   width: 670px;
   font-size: 20px;
@@ -100,10 +96,10 @@
 .knot-zone {
   overflow: hidden;
 }
-/* N_obj is mirrored (rotation -180; x 1434 in Frame 118 is its right edge) → page x -3…1437 */
-.knot-nerile { left: -3px; top: 574px; width: 1440px; height: 360px; }
-.knot-aieule { left: 3px; top: 1077px; width: 1400px; height: 387px; }
-.knot-amant { left: 3px; top: 1662px; width: 1440px; height: 343px; }
+/* N_obj is mirrored (rotation -180) → x -6…1434 */
+.knot-nerile { left: -6px; top: 574px; width: 1440px; height: 360px; }
+.knot-aieule { left: 0; top: 1077px; width: 1400px; height: 387px; }
+.knot-amant { left: 0; top: 1662px; width: 1440px; height: 343px; }
 .knot-img {
   opacity: 0;
   transition: opacity 200ms var(--ease-out), top 0s linear 200ms, left 0s linear 200ms;
@@ -125,7 +121,7 @@
 .knot-amant.is-active .knot-img { left: 122px; top: 31px; }
 
 .object-item {
-  left: 689px;
+  left: 686px;
   font-weight: 500;
   color: #000;
   letter-spacing: -0.44px;
@@ -164,17 +160,17 @@
   }
   .object-hero {
     height: auto;
-    aspect-ratio: 1440 / 921;
+    aspect-ratio: 1440 / 810;
     top: 0;
   }
   .object-hero-canvas {
     height: 100%;
   }
-  .object-hero-patch { left: 89.2%; top: 90.8%; width: 4.7%; height: 9.2%; }
   /* 48px on the 1440px frame, scaled with the hero's aspect-ratio box */
   .object-hero-copy { font-size: 3.33vw; }
-  .object-hero-copy-top { left: 5.97%; top: 11.5%; }
-  .object-hero-copy-bottom { left: 92.99%; top: 80%; }
+  .object-hero-img { top: -5.19%; height: 113.7%; }
+  .object-hero-copy-top { left: 5.97%; top: 13.09%; }
+  .object-hero-copy-bottom { left: 92.99%; top: 76.79%; }
   .object-body,
   .object-body-canvas {
     height: auto;

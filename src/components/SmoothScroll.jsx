@@ -20,6 +20,12 @@ export function scrollToTop() {
   window.scrollTo(0, 0);
 }
 
+/** Glide back to the top (footer TOP link). */
+export function glideToTop() {
+  if (instance) instance.scrollTo(0, { duration: 1.2 });
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 /** Jump straight to `y` (no glide), e.g. to land on a section right after a route change. */
 export function jumpTo(y) {
   instance?.scrollTo(y, { immediate: true, force: true });
