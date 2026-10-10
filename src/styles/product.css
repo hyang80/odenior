@@ -146,6 +146,17 @@
 .sl-sub span:first-child { font-size: 24px; line-height: 40px; }
 .sl-gap { font-size: 16px; line-height: 24px; }
 .sl-size { font-size: 20px; line-height: normal; }
+/* "click the odd object" (132:3242, @1110,665) above the knot buttons */
+.series-hint {
+  left: 1110px;
+  top: 779px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 25px;
+  font-weight: 500;
+  color: #b5b5b5;
+  white-space: nowrap;
+}
 .series-buttons {
   left: 1098px;
   top: 804px;
@@ -320,7 +331,8 @@
     width: 56% !important;
     height: 72% !important;
   }
-  .series-tag { display: none; }
+  .series-tag,
+  .series-hint { display: none; }
   .series-label { left: 0; top: auto; bottom: 0; }
   .sl-name { font-size: 24px; }
   .sl-sub span:first-child { font-size: 16px; line-height: 26px; }

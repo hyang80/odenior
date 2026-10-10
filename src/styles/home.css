@@ -7,10 +7,43 @@
 .hero {
   height: calc(906px * var(--zoom));
   background: #bcab9d;
-  /* Curtain: pinned once its bottom edge is in view; .home-cover then slides over it */
+}
+/* Hero → intro stage (HeroIntro in Home.jsx): one pinned frame, at least a viewport tall, over a
+   long runway. The hero and intro are stacked in it and crossfade under the fog (CurtainMist);
+   the negative bottom margin lets the next section follow right under the intro once it unpins. */
+.home-stage {
+  --stage-h: max(100vh, calc(792px * var(--zoom)));
+  position: relative;
+  height: calc(var(--stage-h) + 200vh);
+  margin-bottom: calc(792px * var(--zoom) - var(--stage-h));
+}
+.home-stage-inner {
   position: sticky;
-  top: min(0px, calc(100vh - 906px * var(--zoom)));
-  z-index: 0;
+  top: 0;
+  height: var(--stage-h);
+  overflow: hidden;
+  background: #f8f8f7;
+}
+.home-stage .hero {
+  position: absolute;
+  top: min(0px, calc(var(--stage-h) - 906px * var(--zoom))); /* bottom-aligned on short screens */
+  left: 0;
+  right: 0;
+  opacity: calc(1 - var(--hero-out, 0));
+}
+.home-stage.is-hero-gone .hero {
+  visibility: hidden;
+}
+.home-stage .intro {
+  position: absolute;
+  top: calc(9px * var(--zoom)); /* Figma's 9px gap above the intro */
+  left: 0;
+  right: 0;
+  opacity: var(--intro-in, 0);
+  pointer-events: none;
+}
+.home-stage.is-intro .intro {
+  pointer-events: auto;
 }
 /* While covered (--cover 0 → 1, set in Hero) the hero media drifts up slower than the page;
    the hero copy stays put */
@@ -22,13 +55,20 @@
   transform: translateY(calc(var(--cover, 0) * -90px * var(--zoom))) scale(calc(1 + var(--cover, 0) * 0.06));
   transform-origin: 50% 0;
 }
+/* Fog for the hero → intro crossfade (CurtainMist.jsx): above the page,
+   below the scent trail (50) and header (100); never blocks input */
+.curtain-mist {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 40;
+  pointer-events: none;
+}
 .home-cover {
   position: relative;
-  box-shadow: 0 -24px 60px rgba(30, 25, 21, 0.18);
   z-index: 1;
   background: #f8f8f7;
-  /* Figma's 9px gap above the intro lives inside the cover so the hero never peeks through */
-  padding-top: calc(9px * var(--zoom));
 }
 .hero-media {
   position: absolute;
@@ -258,13 +298,13 @@
   opacity: 1;
 }
 
-/* --- ODD SERIES 1:55 (top 2390) + VIEW ALL (top 3398) --- */
+/* --- ODD SERIES 1:55 (top 2390, 1440×1007) --- */
 .odd-series {
-  height: calc(1193px * var(--zoom));
+  height: calc(1007px * var(--zoom));
   margin-top: calc(107px * var(--zoom));
 }
 .odd-canvas {
-  height: 1193px;
+  height: 1007px;
 }
 .odd-title {
   left: 86px;
@@ -297,9 +337,12 @@
   }
 }
 
-/* Product card — Frame 94/95/96 (406×710.86) */
+/* Product card — Frame 94/95/96 (406×710.86); a link on home (→ that bottle on /product) */
 .product-card {
   position: relative;
+  display: block;
+  color: inherit;
+  text-decoration: none;
   width: 406px;
   height: 710.859px;
   flex: none;
@@ -405,30 +448,6 @@
 .product-card.is-active .pc-name { color: #4f443b; }
 .product-card.is-active .pc-sub,
 .product-card.is-active .pc-desc { color: #a6a6a6; }
-
-.view-all {
-  left: 1153px;
-  top: 1008px;
-  width: 195px;
-  height: 62px;
-  display: block;
-  background: rgba(181, 160, 146, 0);
-  transition: background-color 220ms var(--ease-in), color 220ms var(--ease-in);
-  color: #000;
-}
-.view-all span {
-  position: absolute;
-  left: 104.5px;
-  top: 27px;
-  transform: translateX(-50%);
-  font-size: 24px;
-  line-height: 8px;
-  white-space: pre;
-}
-.view-all.is-active {
-  background: #b5a092;
-  color: #fff;
-}
 
 /* --- Split row: Frame 97 (734×832) + perfume-mov (1478×832 @ x734) at top 3583 --- */
 .split {
@@ -590,10 +609,26 @@
 
 /* ===== Mobile / tablet (< 900px): stacked flow layout ===== */
 @media (max-width: 899px) {
+  /* no pinned stage on mobile: hero then intro in plain flow */
+  .home-stage {
+    height: auto;
+    margin-bottom: 0;
+  }
+  .home-stage-inner {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+  .home-stage .hero,
+  .home-stage .intro {
+    position: relative;
+    top: auto;
+    opacity: 1;
+    pointer-events: auto;
+  }
   .hero {
     height: auto;
     min-height: 100svh;
-    top: 0;
   }
   .hero-image,
   .hero-video {
@@ -713,8 +748,7 @@
   }
   .odd-title,
   .odd-sub,
-  .odd-cards,
-  .view-all {
+  .odd-cards {
     position: relative;
     left: auto;
     top: auto;
@@ -745,10 +779,6 @@
   .pc-name { font-size: 22px; }
   .pc-sub { font-size: 15px; }
   .pc-desc { font-size: 16px; }
-  .view-all {
-    align-self: flex-end;
-    margin-top: 32px;
-  }
 
   .split {
     height: auto;

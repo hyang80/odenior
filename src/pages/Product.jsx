@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { jumpTo } from '../components/SmoothScroll.jsx';
 import { useVariant } from '../hooks/useVariant.js';
 import { useNav } from '../hooks/useNav.js';
 import PerfumeModel from '../components/PerfumeModel.jsx';
@@ -8,6 +10,34 @@ import '../styles/product.css';
 
 // Figma 92:3258 "Frame 121" — one 1440×810 showcase with three variants (DF-N / VA-Ai / VA-Am),
 // switched by the knot buttons (93:3438). Each variant ships its own button icon set.
+/*
+ * The approved 3D bottle finish (first tuned on AiEULE), shared by every bottle model: frosted
+ * neutral-grey glass, the model's own liquid, a lightly glossy ivory knot a shade darker than the
+ * page background (faint emissive softens its shadows). Only the knot cap's material name differs
+ * per export.
+ */
+const CAP = { color: [0.68, 0.66, 0.61, 1], roughness: 0.25, metallic: 0, emissive: [0.04, 0.039, 0.036] };
+const bottleMaterials = (cap, capExtra = {}) => ({
+  // Frosted glass at 70% over the liquid, always drawn after it (renderOrder) so the liquid shows
+  // faintly and the same from every angle
+  // A clear top coat adds the soft sheen of the photographed frosted glass without changing its colour
+  'Material.005': {
+    color: [0.695, 0.682, 0.669, 0.7],
+    roughness: 0.65,
+    metallic: 0,
+    renderOrder: 1,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.15,
+  }, // bottle
+  'Material.006': { renderOrder: 0 }, // liquid
+  [cap]: { ...CAP, ...capExtra }, // knot cap
+  // neck pieces exported without a material (glTF default: white, fully metallic) → cap ivory,
+  // shaded smooth (they were exported flat, so the neck showed vertical facets under the knot)
+  Default: { ...CAP, smooth: 60 },
+});
+// The liquid fills 82% of the bottle and sloshes when the bottle is dragged
+const LIQUID = { material: 'Material.006', fill: 0.82 };
+
 const SERIES = [
   {
     key: 'nerile',
@@ -23,6 +53,10 @@ const SERIES = [
     ],
     color: '#ac9383',
     icons: ['/assets/58c79.svg', '/assets/ed0a9.svg', '/assets/ccbb1.svg'],
+    // The photo slot is replaced by the draggable 3D bottle
+    model: '/models/nerile.glb',
+    materials: bottleMaterials('tripo_mat_a2b903dc.002'),
+    liquid: LIQUID,
   },
   {
     key: 'aieule',
@@ -36,34 +70,11 @@ const SERIES = [
       { label: 'GRANDMOTHER', left: 929, top: 588 },
       { label: 'AiEULE', left: 916, top: 164 },
     ],
-    color: '#8b5534',
+    color: '#996646',
     icons: ['/assets/046cc.svg', '/assets/d48cb.svg', '/assets/ccbb1.svg'],
-    // The photo slot is replaced by the draggable 3D bottle
     model: '/models/aieule-2.glb',
-    // Tuned to match the neighbouring photos: frosted neutral-grey glass, lightly glossy ivory knot
-    // a shade darker than the page background (faint emissive softens its shadows)
-    materials: {
-      // Frosted glass at 70% over the liquid, always drawn after it (renderOrder) so the liquid shows
-      // faintly and the same from every angle
-      // A clear top coat adds the soft sheen of the photographed frosted glass without changing its colour
-      'Material.005': {
-        color: [0.695, 0.682, 0.669, 0.7],
-        roughness: 0.65,
-        metallic: 0,
-        renderOrder: 1,
-        clearcoat: 0.7,
-        clearcoatRoughness: 0.15,
-      }, // bottle
-      'Material.006': { renderOrder: 0 }, // liquid
-      'tripo_mat_d38952c2.002': {
-        color: [0.68, 0.66, 0.61, 1],
-        roughness: 0.25,
-        metallic: 0,
-        emissive: [0.04, 0.039, 0.036],
-      }, // knot cap
-    },
-    // The liquid fills 82% of the bottle and sloshes when the bottle is dragged
-    liquid: { material: 'Material.006', fill: 0.82 },
+    materials: bottleMaterials('tripo_mat_d38952c2.002'),
+    liquid: LIQUID,
   },
   {
     key: 'amant',
@@ -77,8 +88,12 @@ const SERIES = [
       { label: 'LOVER', left: 957, top: 623 },
       { label: 'AMANT', left: 923, top: 158 },
     ],
-    color: '#8b344e',
+    color: '#9b6777',
     icons: ['/assets/9853d.svg', '/assets/ed0a9.svg', '/assets/d2889.svg'],
+    model: '/models/amant.glb',
+    // the export's swirl texture on the knot is dropped so it gets the plain ivory finish
+    materials: bottleMaterials('tripo_material_24568c86_f249_46d2_bb69_c06d44d2d25c.001', { texture: null }),
+    liquid: LIQUID,
   },
 ];
 const BUTTON_LEFT = [0, 92, 184]; // bt1 / bt2 / bt3 inside the 244×60 button group
@@ -87,7 +102,22 @@ export default function Product() {
   const nav = useNav();
   // Frame 99: hover → Variant2 (dissolve 200ms), click → Object Story (dissolve 220ms ease-out)
   const cta = useVariant();
-  const [active, setActive] = useState(0);
+  // Opened from a home ODD SERIES card: start on that bottle and land on the series section
+  const location = useLocation();
+  const opened = location.state?.series ?? location.hash.slice(1);
+  const [active, setActive] = useState(() => Math.max(0, SERIES.findIndex((s) => s.key === opened)));
+  const seriesRef = useRef(null);
+  useEffect(() => {
+    if (!SERIES.some((s) => s.key === opened)) return undefined;
+    // after the route change's own scroll-to-top has run
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => {
+        const el = seriesRef.current;
+        if (el) jumpTo(el.getBoundingClientRect().top + window.scrollY);
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [opened]);
   const current = SERIES[active];
 
   return (
@@ -110,7 +140,7 @@ export default function Product() {
         </div>
       </section>
 
-      <section className="section product-series">
+      <section className="section product-series" ref={seriesRef}>
         <div className="canvas product-series-canvas">
           <div className="abs series-title">
             <p>ODD</p>
@@ -169,6 +199,7 @@ export default function Product() {
             </div>
           ))}
 
+          <p className="abs series-hint">click the odd object</p>
           <div className="abs series-buttons" role="tablist" aria-label="ODD 시리즈 선택">
             {SERIES.map((s, i) => (
               <button

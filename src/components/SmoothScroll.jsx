@@ -20,6 +20,12 @@ export function scrollToTop() {
   window.scrollTo(0, 0);
 }
 
+/** Jump straight to `y` (no glide), e.g. to land on a section right after a route change. */
+export function jumpTo(y) {
+  instance?.scrollTo(y, { immediate: true, force: true });
+  window.scrollTo(0, y);
+}
+
 // A page can claim wheel gestures (e.g. the home curtain snap). Return false to swallow the
 // event; the guard is responsible for scrolling (it receives the lenis instance).
 let wheelGuard = null;

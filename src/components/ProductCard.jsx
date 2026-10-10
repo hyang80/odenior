@@ -1,10 +1,22 @@
 import { useVariant } from '../hooks/useVariant.js';
 
-/* Figma Frame 94 / 95 / 96 — product card with hover (Variant2) state, dissolve 220ms */
-export default function ProductCard({ data }) {
+/* Figma Frame 94 / 95 / 96 — product card with hover (Variant2) state, dissolve 220ms.
+   With `href`/`onOpen` it is a link (to that bottle in the product page's ODD SERIES). */
+export default function ProductCard({ data, href, onOpen }) {
   const { active, bind } = useVariant();
+  const Tag = href ? 'a' : 'div';
+  const link = href
+    ? {
+        href,
+        'aria-label': `${data.name} 자세히 보기`,
+        onClick: (e) => {
+          e.preventDefault();
+          onOpen?.();
+        },
+      }
+    : {};
   return (
-    <div className={`product-card${active ? ' is-active' : ''}`} {...bind}>
+    <Tag className={`product-card${active ? ' is-active' : ''}`} {...bind} {...link}>
       <div className="pc-bg" />
       <div
         className="pc-img"
@@ -29,6 +41,6 @@ export default function ProductCard({ data }) {
         <p>3.4 FL. OZ.</p>
         <p>50ml / 100ml</p>
       </div>
-    </div>
+    </Tag>
   );
 }

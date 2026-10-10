@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useVariant } from '../hooks/useVariant.js';
 import { useNav } from '../hooks/useNav.js';
 import LineDraw from '../components/LineDraw.jsx';
+import CurtainMist, { FOG_CLEAR } from '../components/CurtainMist.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import Footer from '../components/Footer.jsx';
 import { OPENING_DONE_EVENT } from '../components/Opening.jsx';
-import { useCurtainSnap } from '../hooks/useCurtainSnap.js';
 import { usePageRevealed } from '../hooks/useReveal.js';
 import '../styles/home.css';
 
@@ -66,6 +66,8 @@ const CARDS = [
   },
 ];
 
+const HERO_VIDEO_RATE = 2;
+
 function Hero() {
   const sectionRef = useRef(null);
   const videoRef = useRef(null);
@@ -73,34 +75,8 @@ function Hero() {
   // Title lines rise in once the opening screen lifts
   const revealed = usePageRevealed();
 
-  // Curtain snap: one wheel gesture covers / uncovers the hero in a single glide
-  useCurtainSnap(sectionRef);
+  // The hero sits in the hero → intro stage (HeroIntro): it fades out under the fog there
 
-  // Curtain depth: --cover goes 0 → 1 as .home-cover slides over the pinned hero
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return undefined;
-    let raf = 0;
-    let last = -1;
-    const update = () => {
-      raf = 0;
-      const p = Math.min(1, Math.max(0, window.scrollY / el.offsetHeight));
-      if (Math.abs(p - last) < 0.001) return;
-      last = p;
-      el.style.setProperty('--cover', p.toFixed(4));
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }, []);
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return undefined;
@@ -109,6 +85,9 @@ function Hero() {
     v.defaultMuted = true;
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
+    // Played at 2× — at its native speed the footage reads as a still image
+    v.defaultPlaybackRate = HERO_VIDEO_RATE;
+    v.playbackRate = HERO_VIDEO_RATE;
     const tryPlay = () => {
       if (v.paused) v.play().catch(() => {});
     };
@@ -120,7 +99,10 @@ function Hero() {
     const onVisible = () => {
       if (document.visibilityState === 'visible') tryPlay();
     };
-    const onPlaying = () => setPlaying(true);
+    const onPlaying = () => {
+      v.playbackRate = HERO_VIDEO_RATE; // some browsers reset the rate when the source (re)loads
+      setPlaying(true);
+    };
     const onPause = () => setPlaying(false);
     // If the browser blocked autoplay (e.g. Safari low power mode), retry on the first interaction
     const gestures = ['pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll'];
@@ -198,20 +180,22 @@ function Hero() {
   );
 }
 
-function Intro() {
+function Intro({ shown }) {
   const sectionRef = useRef(null);
-  // Figma 1:235: instance starts on Variant2 — the line draws as the intro arrives (once it is
-  // 95% in view, i.e. as the curtain lands, so the draw is seen from its start);
-  // leave → fade out; enter → redraw immediately (Figma's +80ms enter delay dropped on request)
+  // Figma 1:235: instance starts on Variant2 — the line draws as the intro arrives;
+  // leave → fade out; enter → redraw immediately (Figma's +80ms enter delay dropped on request).
+  // Desktop: "arrives" = it has faded in through the fog (`shown` from HeroIntro, so going back
+  // up resets it and the line redraws next time). Mobile (no stage): once it is 95% in view.
   const line = useVariant({ initial: true });
-  const [arrived, setArrived] = useState(false);
+  const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el) return undefined;
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setArrived(true), { threshold: 0.95 });
+    if (!el || shown !== undefined) return undefined;
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setInView(true), { threshold: 0.95 });
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [shown]);
+  const arrived = shown ?? inView;
   const lineMode = line.active && arrived ? 'draw' : 'idle';
 
   return (
@@ -292,28 +276,22 @@ function OurStory() {
 
 function OddSeries() {
   const nav = useNav();
-  const viewAll = useVariant();
   return (
     <section className="section odd-series">
       <div className="canvas odd-canvas">
         <h2 className="abs odd-title fw-500">ODD SERIES</h2>
         <p className="abs odd-sub fw-500">EXPLORE OUR ICONIC PERFUMES</p>
         <div className="odd-cards">
+          {/* Each card opens the product page on its own bottle in ODD SERIES (Figma 92:3258) */}
           {CARDS.map((c) => (
-            <ProductCard key={c.key} data={c} />
+            <ProductCard
+              key={c.key}
+              data={c}
+              href={`/product#${c.key}`}
+              onOpen={() => nav('/product', 220, { series: c.key })}
+            />
           ))}
         </div>
-        <a
-          href="/product"
-          className={`abs view-all${viewAll.active ? ' is-active' : ''}`}
-          onClick={(e) => {
-            e.preventDefault();
-            nav('/product', 200);
-          }}
-          {...viewAll.bind}
-        >
-          <span className="fw-500">{'VIEW ALL  -->'}</span>
-        </a>
       </div>
     </section>
   );
@@ -359,13 +337,76 @@ function Split() {
   );
 }
 
+const smoothstep = (a, b, x) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
+/*
+ * Hero → intro stage (desktop): both sit pinned in one viewport-tall frame while the page scrolls
+ * through a long runway, so nothing slides — the hero fades out and the intro fades in on the
+ * spot, under the fog CurtainMist draws. --xf (0 → 1) is the runway progress; it also drives the
+ * hero media's slow drift (--cover). On mobile the stage is plain flow and nothing is pinned.
+ */
+function HeroIntro() {
+  const stageRef = useRef(null);
+  const [shown, setShown] = useState(undefined);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return undefined;
+    const desktop = window.matchMedia('(min-width: 900px)');
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (!desktop.matches) {
+        setShown(undefined);
+        return;
+      }
+      const inner = stage.firstElementChild;
+      const runway = stage.offsetHeight - inner.offsetHeight;
+      const xf = runway > 0 ? Math.min(1, Math.max(0, (window.scrollY - stage.offsetTop) / runway)) : 0;
+      const heroOut = smoothstep(0.18, 0.42, xf);
+      const introIn = smoothstep(0.36, 0.68, xf);
+      stage.style.setProperty('--xf', xf.toFixed(4));
+      stage.style.setProperty('--cover', xf.toFixed(4));
+      stage.style.setProperty('--hero-out', heroOut.toFixed(4));
+      stage.style.setProperty('--intro-in', introIn.toFixed(4));
+      stage.classList.toggle('is-intro', introIn > 0.5);
+      stage.classList.toggle('is-hero-gone', heroOut > 0.999);
+      // the line only starts once the fog has fully cleared
+      setShown(xf >= FOG_CLEAR);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    desktop.addEventListener('change', onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      desktop.removeEventListener('change', onScroll);
+    };
+  }, []);
+
+  return (
+    <section className="home-stage" ref={stageRef}>
+      <div className="home-stage-inner">
+        <Hero />
+        <Intro shown={shown} />
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <main className="page page-home">
-      <Hero />
-      {/* Curtain: everything from the intro (1:235) down slides up over the pinned hero */}
+      <HeroIntro />
+      <CurtainMist />
       <div className="home-cover">
-        <Intro />
         <OurStory />
         <OddSeries />
         <Split />

@@ -37,3 +37,23 @@ export function useInViewOnce(ref, { threshold = 0.2, rootMargin = '0px 0px -12%
   }, [ref, pageRevealed, seen, threshold, rootMargin]);
   return seen;
 }
+
+/**
+ * True while `ref` is inside the viewport band (both ways: it turns false again once the element
+ * scrolls out past the top or the bottom). Waits for the opening screen like useInViewOnce.
+ */
+export function useInView(ref, { threshold = 0, rootMargin = '-10% 0px -10% 0px' } = {}) {
+  const pageRevealed = usePageRevealed();
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!pageRevealed || !el) return undefined;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold,
+      rootMargin,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref, pageRevealed, threshold, rootMargin]);
+  return inView;
+}

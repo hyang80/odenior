@@ -12,12 +12,57 @@ import { attachLiquidSlosh } from './liquidSlosh.js';
  * warm-grey floor, two key lights facing the front and back and dimmed patches facing the
  * sides), so front and back read the same tone and shading only falls on the sides; `materials` can
  * override colours per glTF material: { [name]: { color: [r, g, b, a] (linear), roughness,
- * metallic, emissive: [r, g, b], alphaMode, renderOrder, clearcoat, clearcoatRoughness } } — a faint emissive lifts a part's shadows
+ * metallic, emissive: [r, g, b], alphaMode, texture: null, renderOrder, clearcoat, clearcoatRoughness,
+ * smooth: angle° } } (`smooth` re-shades a faceted part smoothly, see smoothNormals)
+ * (`texture: null` drops an exported base-colour texture; parts exported without a material are
+ * listed as "Default") — a faint emissive lifts a part's shadows
  * without relighting; renderOrder pins the draw order of see-through parts (three.js otherwise sorts
  * them by distance, so the liquid would jump in front of the glass when viewed from below).
  * `liquid` ({ material, fill, surface }) makes that material slosh when the bottle is dragged
  * (liquidSlosh.js).
  */
+/*
+ * Smooth shading for a faceted part: vertices that share a position (split per face by the export)
+ * get the average of their normals, but only across faces within `angle`° of each other, so
+ * hard rims (a cylinder's cap edge) stay crisp — like Blender's auto smooth. Shape untouched.
+ */
+function smoothNormals(geometry, angle) {
+  if (geometry.userData.smoothed) return;
+  const pos = geometry.attributes.position;
+  const nor = geometry.attributes.normal;
+  if (!pos || !nor) return;
+  const cos = Math.cos((angle * Math.PI) / 180);
+  const groups = new Map();
+  for (let i = 0; i < pos.count; i++) {
+    const key = `${Math.round(pos.getX(i) * 1e5)},${Math.round(pos.getY(i) * 1e5)},${Math.round(pos.getZ(i) * 1e5)}`;
+    const g = groups.get(key);
+    if (g) g.push(i);
+    else groups.set(key, [i]);
+  }
+  const src = Float32Array.from(nor.array);
+  const at = (i) => [src[i * 3], src[i * 3 + 1], src[i * 3 + 2]];
+  groups.forEach((g) => {
+    if (g.length < 2) return;
+    g.forEach((i) => {
+      const ni = at(i);
+      let x = 0;
+      let y = 0;
+      let z = 0;
+      g.forEach((j) => {
+        const nj = at(j);
+        if (ni[0] * nj[0] + ni[1] * nj[1] + ni[2] * nj[2] < cos) return;
+        x += nj[0];
+        y += nj[1];
+        z += nj[2];
+      });
+      const len = Math.hypot(x, y, z) || 1;
+      nor.setXYZ(i, x / len, y / len, z / len);
+    });
+  });
+  nor.needsUpdate = true;
+  geometry.userData.smoothed = true;
+}
+
 export default function PerfumeModel({ src, poster, alt, className, materials, liquid }) {
   const viewerRef = useRef(null);
   const [ready, setReady] = useState(() => typeof customElements !== 'undefined' && !!customElements.get('model-viewer'));
@@ -46,6 +91,7 @@ export default function PerfumeModel({ src, poster, alt, className, materials, l
         if (o.metallic != null) pbr.setMetallicFactor(o.metallic);
         if (o.emissive) m.setEmissiveFactor(o.emissive);
         if (o.alphaMode) m.setAlphaMode(o.alphaMode);
+        if (o.texture === null) pbr.baseColorTexture?.setTexture(null);
       });
       // model-viewer has no public draw-order API; reach the three.js scene through its symbol
       const sceneKey = Object.getOwnPropertySymbols(mv).find((k) => k.description === 'scene');
@@ -54,6 +100,7 @@ export default function PerfumeModel({ src, poster, alt, className, materials, l
         const o = obj.isMesh && materials[obj.material?.name];
         if (!o) return;
         if (o.renderOrder != null) obj.renderOrder = o.renderOrder;
+        if (o.smooth) smoothNormals(obj.geometry, o.smooth);
         // glossy top coat over a matte base (three.js MeshPhysicalMaterial), colour untouched
         if (o.clearcoat != null && 'clearcoat' in obj.material) {
           obj.material.clearcoat = o.clearcoat;

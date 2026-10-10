@@ -1,27 +1,47 @@
-/* ===== BRAND / Our Story (Figma 1:247, 1440×3570) ===== */
+/* ===== BRAND / Our Story (Figma 115:2068 "Frame 126", 1440×4405) ===== */
 .page-brand {
   background: linear-gradient(to bottom, #fff 0%, #f9f4ef 72.367%);
-  min-height: calc(3570px * var(--zoom));
+  /* the trailing cover (Brand.jsx) must not add scroll length; clip doesn't break sticky */
+  overflow: clip;
 }
-
-/* Hero — Rectangle 2828 (1514×910 @ -37,0, 1px black border) */
-.brand-hero {
-  height: calc(910px * var(--zoom));
-  /* Curtain: pinned once its bottom edge is in view; .brand-cover then slides over it */
+/* Photo part: 0 → 3268 (where the cover's fade turns solid). Pinned once its bottom edge is in
+   view; .brand-cover (Frame 127, from its fade at 2777) then slides up over it, and the pinned
+   photo darkens and drifts up as it gets covered (--cover-p, Brand.jsx). */
+.brand-top {
   position: sticky;
-  top: min(0px, calc(100vh - 910px * var(--zoom)));
+  top: min(0px, calc(100vh - 3268px * var(--zoom)));
   z-index: 0;
+  height: calc(3268px * var(--zoom));
 }
-.brand-cover {
-  position: relative;
-  z-index: 1;
-  /* the page gradient (#fff → #f9f4ef at 72.4% of 3570px) continued from y 910 */
-  background: linear-gradient(to bottom, #fdfbf9 0%, #f9f4ef 62.9%, #f9f4ef 100%);
-  box-shadow: 0 -24px 60px rgba(30, 25, 21, 0.12);
+.brand-top::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #2c2825;
+  opacity: calc(var(--cover-p, 0) * 0.7);
+  pointer-events: none;
+}
+.brand-top-canvas,
+.brand-cover-canvas {
+  color: #fff;
+  font-weight: 500;
+}
+.brand-top-canvas {
+  height: 3268px;
+  transform: translateY(calc(var(--cover-p, 0) * -70px));
 }
 
-/* Line-by-line reveal: each .rv line goes blur → sharp, staggered by --i, once its
-   .rv-group is revealed (Brand.jsx); no movement */
+/* image 691 (1440×4187 @ 0,-89) */
+.brand-bg {
+  left: 0;
+  top: -89px;
+  width: 1440px;
+  height: 4187px;
+  object-fit: cover;
+}
+
+/* Copy lines (.rv), no movement. Each line goes blur → sharp as its .rv-group scrolls into
+   view (staggered by --i, Brand.jsx) and stays. */
 .rv {
   opacity: 0;
   filter: blur(8px);
@@ -39,91 +59,77 @@
     transition: none;
   }
 }
-.brand-hero-img {
-  position: absolute;
-  top: 0;
-  left: calc(-37px * var(--zoom));
-  width: max(calc(1514px * var(--zoom)), calc(100% + 74px * var(--zoom)));
-  height: 100%;
-  border: 1px solid #000;
-  overflow: hidden;
-}
-.brand-hero-canvas {
-  height: 910px;
-}
 
-/* Frame 78 (1440×771 @ 6,20) — copy reveals on arrival */
-.f78 {
-  left: 6px;
-  top: 20px;
+/* Hero copy — title 116:2659 (center 719.5, top 308), sub 116:2657 (center 720, top 497) */
+.brand-hero-copy {
+  left: 0;
+  top: 308px;
   width: 1440px;
-  height: 771px;
-}
-.f78-text {
-  left: 720.5px;
-  top: 322px;
-  transform: translateX(-50%);
-  font-size: 32px;
-  line-height: 64px;
-  letter-spacing: -0.64px;
-  font-weight: 600;
-  color: #fff;
   text-align: center;
   white-space: nowrap;
 }
-
-/* Body: 910 → 2596 */
-.brand-body {
-  height: calc(1686px * var(--zoom));
+.brand-hero-title {
+  margin: 0 0 0 -1px;
+  font-size: 64px;
+  line-height: 76px;
+  font-weight: 500;
+  letter-spacing: -1.28px;
 }
-.brand-body-canvas {
-  height: 1686px;
+.brand-hero-title span {
+  display: block;
+}
+.brand-hero-sub {
+  margin-top: 37px;
+  font-size: 20px;
+  line-height: 41px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
 }
 
-/* Frame 79 (1440×712 @ 0,1014) — shown in its Figma Variant2 (settled) state */
+/* Frame 79 (1440×712 @ 6,815) — text centred, top 50% − 183px */
 .f79 {
-  left: 0;
-  top: 104px;
+  left: 6px;
+  top: 815px;
   width: 1440px;
   height: 712px;
   overflow: hidden;
 }
 .f79-text {
-  left: 719.5px;
+  left: calc(50% - 0.5px);
   top: 173px;
   transform: translateX(-50%);
   text-align: center;
-  font-weight: 500;
-  color: #000;
   letter-spacing: -0.48px;
   white-space: nowrap;
 }
-.f79-text p {
-  font-size: 28px;
+.f79-lead {
+  font-size: 40px;
   line-height: 60px;
+  font-weight: 700;
 }
-.f79-lead .fw-700 {
-  color: #39312b;
-}
-.f79 .f79-lead {
+.f79-break {
   font-size: 24px;
+  font-weight: 500;
 }
-.f79 .f79-line,
-.f79 .f79-gap {
-  font-size: 18px;
+.f79-line {
+  font-size: 24px;
   line-height: 50px;
 }
+.f79-gap {
+  font-size: 24px;
+  line-height: 60px;
+}
 
-/* Brand copy blocks — Frame 100 (@78,1683) / Frame 101 (@89,2269) */
+/* Brand copy blocks — Frame 100 (@95,1972) / Frame 101 (@95,2356) */
 .f100 {
-  left: 78px;
-  top: 773px;
+  left: 95px;
+  top: 1972px;
   width: 1251px;
   height: 319px;
 }
 .f101 {
-  left: 89px;
-  top: 1359px;
+  left: 95px;
+  top: 2356px;
   width: 1262px;
   height: 199px;
 }
@@ -131,8 +137,6 @@
   position: absolute;
   left: 0;
   top: 0;
-  font-weight: 500;
-  color: #000;
   letter-spacing: -0.44px;
   white-space: nowrap;
 }
@@ -143,20 +147,25 @@
 .bc-title {
   font-size: 32px;
   line-height: 44px;
+  font-weight: 600;
 }
-.bc-accent,
-.bc-accent-2 {
-  color: #7f6958;
+.bc-accent {
+  color: #ede5cc;
 }
-.bc-accent-2 {
-  color: #6e5745;
+.bc-strong {
+  font-weight: 600;
+  line-height: 40px;
+}
+.bc-break {
+  font-weight: 400;
+  line-height: 40px;
 }
 /* "후각" settles into the accent colour once its block has revealed */
 .f101-accent {
   transition: color 900ms var(--ease-out) 900ms;
 }
 .f101.is-revealed .f101-accent {
-  color: #7f6958;
+  color: #ede5cc;
 }
 .bc-gap {
   font-size: 22px;
@@ -164,37 +173,85 @@
 }
 .bc-body {
   font-size: 22px;
+  line-height: 36px;
+}
+.f101 .bc-body {
   line-height: 40px;
 }
 
-/* BEYOND PERFUME — video 1743×980 @ -71,2598, dim rgba(97,97,97,.55) hard-light.
-   The video is 60px taller top and bottom so it can drift (--par -1 → 1, Brand.jsx) slower
-   than the page without exposing an edge. */
+/* Frame 127 (1743×1583 @ -36,2822) — the curtain, in warm black #2c2825. It starts at its
+   fade (Rectangle 2886, 491px from y 2777) over the photo, then is solid to the bottom.
+   Positions inside are relative to 2777 (Figma's Frame 127 y + 45). */
+.brand-cover {
+  position: relative;
+  z-index: 1;
+  height: calc(1628px * var(--zoom));
+  margin-top: calc(-491px * var(--zoom));
+  background: linear-gradient(to bottom, transparent calc(490px * var(--zoom)), #2c2825 0);
+  will-change: transform;
+}
+.brand-fade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(491px * var(--zoom));
+  background: linear-gradient(
+    180deg,
+    rgba(44, 40, 37, 0) 0%,
+    rgba(44, 40, 37, 0.62) 37.5%,
+    rgba(44, 40, 37, 0.82) 57.787%,
+    rgba(44, 40, 37, 0.94) 77.086%,
+    #2c2825 92.738%
+  );
+  pointer-events: none;
+}
+.brand-cover-canvas {
+  height: 1628px;
+}
+/* Atomizer video (1743×847 @ -36,673), lighten @ 27%. It drifts
+   (--par -1 → 1, Brand.jsx) slower than the page; the blurred black bands hide its top and
+   bottom edges. */
 .brand-beyond {
-  height: calc(974px * var(--zoom));
+  left: -36px;
+  top: 673px;
+  width: 1743px;
+  height: 847px;
+  mix-blend-mode: lighten;
+  opacity: 0.27;
 }
 .brand-beyond-video {
   position: absolute;
-  top: calc(-58px * var(--zoom));
-  left: calc(-71px * var(--zoom));
-  width: max(calc(1743px * var(--zoom)), calc(100% + 142px * var(--zoom)));
-  height: calc(1100px * var(--zoom));
-  transform: translateY(calc(var(--par, 0) * 60px * var(--zoom)));
+  inset: 0;
+  /* edges dissolve into the black (the blurred bands alone left a visible rectangle) */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 32%, #000 70%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 32%, #000 70%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  mask-composite: intersect;
+  overflow: hidden;
+  transform: translateY(calc(var(--par, 0) * 40px));
   will-change: transform;
 }
-.brand-beyond-dim {
-  position: absolute;
-  inset: 0;
-  background: rgba(97, 97, 97, 0.55);
-  mix-blend-mode: hard-light;
-}
-.brand-beyond-canvas {
-  height: 974px;
-}
-/* Frame 83 (1439×950 @ 0,2620) — shown in its Variant2 position, lines reveal in view */
-.f83 {
+.brand-band {
   left: 0;
-  top: 24px;
+  width: 1446px;
+  height: 158px;
+  background: #2c2825;
+  filter: blur(56.9px);
+}
+.brand-band-top {
+  top: 602px;
+}
+.brand-band-bottom {
+  top: 1411px;
+}
+
+/* Frame 83 (1439×950 @ 7,540) — text @ 73,329 */
+.f83 {
+  left: 7px;
+  top: 540px;
   width: 1439px;
   height: 950px;
   overflow: hidden;
@@ -203,8 +260,6 @@
   left: 73px;
   top: 329px;
   width: 1225px;
-  font-weight: 500;
-  color: #fff;
   letter-spacing: -0.44px;
   white-space: pre-wrap;
 }
@@ -212,34 +267,54 @@
   font-size: 32px;
   line-height: 44px;
 }
+.f83-accent {
+  color: #fff3ce;
+}
 .f83-gap {
   font-size: 22px;
   line-height: 29px;
 }
+/* four line breaks (4 × 40px) + an empty 29px line */
+.f83-spacer {
+  height: 189px;
+}
 .f83-body {
   font-size: 22px;
   line-height: 40px;
+}
+.f83-regular {
   font-weight: 400;
 }
 
 /* ===== Mobile ===== */
 @media (max-width: 899px) {
-  .page-brand {
-    min-height: 0;
+  .brand-top {
+    position: relative;
+    top: auto;
+    height: auto;
   }
-  .brand-hero {
-    height: 100svh;
-    top: 0;
+  .brand-top::after {
+    display: none;
   }
-  .brand-hero-img {
+  .brand-top-canvas,
+  .brand-cover-canvas {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+    padding: 0 20px 100px;
+  }
+  .brand-top-canvas {
+    padding-bottom: 260px;
+    transform: none;
+  }
+  .brand-bg {
     left: 0;
+    top: 0;
     width: 100%;
-    border-width: 0 0 1px;
-  }
-  .brand-hero-canvas {
     height: 100%;
   }
-  .f78,
+  .brand-hero-copy,
   .f79,
   .f100,
   .f101,
@@ -250,32 +325,28 @@
     width: 100%;
     height: auto;
   }
-  .f78 {
-    height: 100%;
-  }
-  .f78-text {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: calc(100% - 40px);
-    white-space: normal;
-    font-size: 22px;
-    line-height: 40px;
-  }
-  .brand-body,
-  .brand-body-canvas {
-    height: auto;
-  }
-  .brand-body-canvas {
-    padding: 100px 20px;
+  .brand-hero-copy {
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
-    gap: 100px;
+    justify-content: center;
+    white-space: normal;
   }
-  .f79-text {
+  .brand-hero-title {
+    font-size: 36px;
+    line-height: 46px;
+  }
+  .brand-hero-sub {
+    margin-top: 24px;
+    font-size: 15px;
+    line-height: 28px;
+  }
+  .f79-text,
+  .f83-text {
     position: relative;
-    left: auto !important;
-    top: auto !important;
+    left: auto;
+    top: auto;
+    width: 100%;
     transform: none;
     white-space: normal;
   }
@@ -283,37 +354,55 @@
   .brand-copy .pre {
     white-space: normal;
   }
-  .f79 .f79-lead { font-size: 20px !important; line-height: 40px; }
-  .f79 .f79-line { font-size: 15px !important; line-height: 30px !important; }
+  .f79-lead {
+    font-size: 24px;
+    line-height: 40px;
+  }
+  .f79-break {
+    font-size: 15px;
+  }
+  .f79-line,
+  .f79-gap {
+    font-size: 15px;
+    line-height: 30px;
+  }
   .brand-copy {
     position: relative;
     width: 100%;
     white-space: normal;
   }
-  .bc-title { font-size: 24px; line-height: 34px; }
-  .bc-body { font-size: 16px; line-height: 30px; }
+  .bc-title,
+  .f83-title {
+    font-size: 24px;
+    line-height: 34px;
+  }
+  .bc-body,
+  .f101 .bc-body,
+  .f83-body {
+    font-size: 16px;
+    line-height: 30px;
+  }
+  .brand-cover {
+    height: auto;
+    margin-top: -260px;
+    background: linear-gradient(to bottom, transparent 260px, #2c2825 0);
+  }
+  .brand-fade {
+    height: 260px;
+  }
+  .brand-cover-canvas {
+    padding-top: 360px;
+  }
   .brand-beyond {
-    height: auto;
-    min-height: 100svh;
-  }
-  .brand-beyond-video {
-    inset: -60px 0;
+    left: 0;
+    top: 200px;
     width: 100%;
-    height: auto;
+    height: calc(100% - 260px);
   }
-  .brand-beyond-canvas {
-    height: auto;
-    min-height: 100svh;
-    padding: 120px 20px 80px;
-    display: flex;
-    align-items: flex-end;
+  .f83-spacer {
+    height: 60px;
   }
-  .f83-text {
-    position: relative;
-    left: auto;
-    top: auto !important;
-    width: 100%;
+  .brand-band {
+    display: none;
   }
-  .f83-title { font-size: 24px; line-height: 34px; }
-  .f83-body { font-size: 16px; line-height: 30px; }
 }
