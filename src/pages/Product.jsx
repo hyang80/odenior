@@ -21,7 +21,8 @@ const SERIES = [
       { label: 'MOTHER', left: 1021, top: 626 },
       { label: 'NeRillE', left: 939, top: 121 },
     ],
-    icons: ['/assets/cdbee.svg', '/assets/ed0a9.svg', '/assets/ccbb1.svg'],
+    color: '#ac9383',
+    icons: ['/assets/58c79.svg', '/assets/ed0a9.svg', '/assets/ccbb1.svg'],
   },
   {
     key: 'aieule',
@@ -35,7 +36,8 @@ const SERIES = [
       { label: 'GRANDMOTHER', left: 929, top: 588 },
       { label: 'AiEULE', left: 916, top: 164 },
     ],
-    icons: ['/assets/046cc.svg', '/assets/81b36.svg', '/assets/ccbb1.svg'],
+    color: '#8b5534',
+    icons: ['/assets/046cc.svg', '/assets/d48cb.svg', '/assets/ccbb1.svg'],
     // The photo slot is replaced by the draggable 3D bottle
     model: '/models/aieule-2.glb',
     // Tuned to match the neighbouring photos: frosted neutral-grey glass, lightly glossy ivory knot
@@ -75,7 +77,8 @@ const SERIES = [
       { label: 'LOVER', left: 957, top: 623 },
       { label: 'AMANT', left: 923, top: 158 },
     ],
-    icons: ['/assets/9853d.svg', '/assets/ed0a9.svg', '/assets/9bc4c.svg'],
+    color: '#8b344e',
+    icons: ['/assets/9853d.svg', '/assets/ed0a9.svg', '/assets/d2889.svg'],
   },
 ];
 const BUTTON_LEFT = [0, 92, 184]; // bt1 / bt2 / bt3 inside the 244×60 button group
@@ -151,7 +154,9 @@ export default function Product() {
                 </p>
               ))}
               <div className="abs series-label">
-                <p className="sl-name pre">{s.name}</p>
+                <p className="sl-name pre" style={{ color: s.color }}>
+                  {s.name}
+                </p>
                 <p className="sl-sub pre">
                   <span>{s.sub}</span>
                   <span className="sl-gap">
