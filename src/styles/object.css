@@ -1,0 +1,222 @@
+/* ===== Object Story (Figma 1:273 "Frame 105", 1440×3109) ===== */
+.page-object {
+  background-color: #fff;
+  min-height: calc(3109px * var(--zoom));
+}
+
+/* Hero — Frame 106 (1440×921), pinned so Frame 118 can slide over it */
+.object-hero {
+  height: calc(921px * var(--zoom));
+  position: sticky;
+  top: min(0px, calc(100vh - 921px * var(--zoom)));
+  z-index: 0;
+}
+.object-hero-img {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.object-hero-img img {
+  position: absolute;
+  left: 0;
+  top: -5.58%;
+  width: 100%;
+  height: 116.72%;
+  max-width: none;
+  object-fit: cover;
+}
+.object-hero-canvas {
+  height: 921px;
+}
+.object-hero-patch {
+  left: 1285px;
+  top: 836px;
+  width: 68px;
+  height: 85px;
+  background: #e8e5dd;
+}
+/* Figma 58:2474 / 58:2475 — live text (was image), fades in together on arrival */
+.object-hero-copy {
+  font-size: 48px;
+  font-weight: 400;
+  line-height: normal;
+  color: #7f7f7f;
+  white-space: nowrap;
+  opacity: 0;
+  filter: blur(10px);
+  /* Slow, soft arrival: eases in gently, then lingers as opacity and focus settle together */
+  transition: opacity 1300ms cubic-bezier(0.33, 0, 0.15, 1) 100ms,
+    filter 1300ms cubic-bezier(0.33, 0, 0.15, 1) 100ms;
+}
+.object-hero-canvas.is-revealed .object-hero-copy {
+  opacity: 1;
+  filter: blur(0);
+}
+.object-hero-copy-top {
+  left: 86px;
+  top: 106px;
+}
+.object-hero-copy-bottom {
+  left: 1339px;
+  top: 737px;
+  transform: translateX(-100%);
+  text-align: right;
+}
+
+/* Frame 118 (59:2483) — 1434×2185 at (3, 921) in Frame 105, white + beige gradient. The cover
+   spans the full width from y 921 so the hero never peeks out; canvas coordinates below are
+   Frame 105 page coordinates minus 921 (i.e. Frame 118 coordinates + 3px in x). */
+.object-body {
+  height: calc(2188px * var(--zoom));
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 25.634%, rgba(217, 186, 155, 0.2) 85.446%), #fff;
+  box-shadow: 0 -24px 60px rgba(30, 25, 21, 0.12);
+}
+.object-body-canvas {
+  height: 2188px;
+}
+.object-lead {
+  left: 87px;
+  top: 106px;
+  font-size: 36px;
+  line-height: 52px;
+  letter-spacing: -0.72px;
+  color: #7f6958;
+  white-space: nowrap;
+}
+.object-intro {
+  left: 689px;
+  top: 123px;
+  width: 670px;
+  font-size: 20px;
+  line-height: 29px;
+  letter-spacing: -0.4px;
+  color: #000;
+  white-space: pre-wrap;
+}
+
+/* Object zones = Figma N_obj / i_obj / A_obj frames (hover areas, clipped) */
+.knot-zone {
+  overflow: hidden;
+}
+/* N_obj is mirrored (rotation -180; x 1434 in Frame 118 is its right edge) → page x -3…1437 */
+.knot-nerile { left: -3px; top: 574px; width: 1440px; height: 360px; }
+.knot-aieule { left: 3px; top: 1077px; width: 1400px; height: 387px; }
+.knot-amant { left: 3px; top: 1662px; width: 1440px; height: 343px; }
+.knot-img {
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out), top 0s linear 200ms, left 0s linear 200ms;
+}
+.knot-zone.is-active .knot-img {
+  opacity: 1;
+  /* Figma: smart animate 800ms ease-out — kept at 800ms but on an expo-out curve so the rise
+     starts at full speed instead of easing in; opacity arrives early */
+  transition: opacity 400ms var(--ease-out), top 800ms cubic-bezier(0.16, 1, 0.3, 1),
+    left 800ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Default → Variant2 image positions, in zone coordinates. The NeRilE image is mirrored inside
+   the mirrored instance, so the flips cancel and it renders un-flipped. */
+.knot-nerile .knot-img { left: 158px; top: 306px; width: 309px; aspect-ratio: 309 / 267; }
+.knot-nerile.is-active .knot-img { left: 164px; top: 74px; }
+.knot-aieule .knot-img { left: 147px; top: 280px; width: 322px; aspect-ratio: 322 / 244; }
+.knot-aieule.is-active .knot-img { top: 93px; }
+.knot-amant .knot-img { left: 128px; top: 259px; width: 359px; aspect-ratio: 359 / 265; }
+.knot-amant.is-active .knot-img { left: 122px; top: 31px; }
+
+.object-item {
+  left: 689px;
+  font-weight: 500;
+  color: #000;
+  letter-spacing: -0.44px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.object-item-1 { top: 640px; }
+.object-item-2 { top: 1213px; }
+.object-item-3 { top: 1721px; }
+.oi-title {
+  font-size: 28px;
+  line-height: 29px;
+}
+.oi-accent {
+  color: #7f6958;
+}
+.oi-sub {
+  font-size: 16px;
+  line-height: 32px;
+  color: #5c5c5c;
+}
+.oi-gap20,
+.oi-body20 {
+  font-size: 20px;
+  line-height: 29px;
+}
+.oi-gap22,
+.oi-body22 {
+  font-size: 22px;
+  line-height: 29px;
+}
+
+@media (max-width: 899px) {
+  .page-object {
+    min-height: 0;
+  }
+  .object-hero {
+    height: auto;
+    aspect-ratio: 1440 / 921;
+    top: 0;
+  }
+  .object-hero-canvas {
+    height: 100%;
+  }
+  .object-hero-patch { left: 89.2%; top: 90.8%; width: 4.7%; height: 9.2%; }
+  /* 48px on the 1440px frame, scaled with the hero's aspect-ratio box */
+  .object-hero-copy { font-size: 3.33vw; }
+  .object-hero-copy-top { left: 5.97%; top: 11.5%; }
+  .object-hero-copy-bottom { left: 92.99%; top: 80%; }
+  .object-body,
+  .object-body-canvas {
+    height: auto;
+  }
+  .object-body-canvas {
+    padding: 72px 20px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .object-lead,
+  .object-intro,
+  .object-item,
+  .knot-zone {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+  }
+  .object-lead { font-size: 26px; line-height: 38px; white-space: normal; }
+  .object-intro { font-size: 16px; line-height: 27px; }
+  .object-item { white-space: normal; }
+  .object-item .pre { white-space: normal; }
+  .oi-title { font-size: 22px; }
+  .oi-body20,
+  .oi-body22 { font-size: 16px; line-height: 27px; }
+  .knot-zone {
+    height: 260px;
+    margin-top: 40px;
+  }
+  .knot-zone .knot-img {
+    left: 50%;
+    right: auto;
+    width: 220px;
+    margin-left: -110px;
+    top: 80px;
+  }
+  .knot-zone.is-active .knot-img { top: 10px; left: 50%; }
+  .knot-nerile { order: 1; }
+  .object-item-1 { order: 2; }
+  .knot-aieule { order: 3; }
+  .object-item-2 { order: 4; }
+  .knot-amant { order: 5; }
+  .object-item-3 { order: 6; }
+}

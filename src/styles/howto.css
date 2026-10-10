@@ -1,0 +1,124 @@
+/* ===== HOW TO USE (Figma 1:375 "Frame 90", 1440×2217) ===== */
+.page-howto {
+  background: #fff;
+}
+.howto-main {
+  height: calc(1853px * var(--zoom));
+}
+.howto-canvas {
+  height: 1853px;
+}
+
+/* Frame 84 (1440×448 @ 0,133) */
+.howto-intro {
+  left: 0;
+  top: 133px;
+  width: 1440px;
+  height: 448px;
+  overflow: hidden;
+}
+.howto-logo,
+.howto-heading {
+  left: 86px;
+  opacity: 0;
+  transition: opacity 1000ms var(--ease-out), top 0s linear 1000ms;
+}
+.howto-logo {
+  top: 224px;
+  width: 291.554px;
+  height: 76.3692px;
+}
+.howto-heading {
+  top: 334px;
+  font-size: 36px;
+  line-height: 54px;
+  font-weight: 500;
+  color: #000;
+  white-space: nowrap;
+}
+.howto-intro.is-active .howto-logo,
+.howto-intro.is-active .howto-heading {
+  opacity: 1;
+  transition: opacity 500ms var(--ease-out), top 500ms var(--ease-out);
+}
+.howto-intro.is-active .howto-logo { top: 79px; }
+.howto-intro.is-active .howto-heading { top: 189px; }
+
+.howto-step {
+  font-size: 22px;
+  font-weight: 500;
+  color: #000;
+  white-space: nowrap;
+}
+.howto-step-1 { left: 129px; top: 895px; color: #39312b; }
+.howto-step-2 { left: 132px; top: 1166px; }
+.howto-step-3 { left: 136px; top: 1433px; }
+.howto-step-1 .fw-600,
+.howto-step-1 .lh54 { line-height: 54px; }
+.lh54 { line-height: 54px; }
+.lh41 { line-height: 41px; }
+.lh28 { line-height: 28px; }
+
+/* Caution block (#f7f2ed, 364px) */
+.howto-caution {
+  height: calc(364px * var(--zoom));
+  background: #f7f2ed;
+}
+.howto-caution-canvas {
+  height: 364px;
+}
+.caution-col {
+  top: 69px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  white-space: nowrap;
+}
+.caution-left { left: 86px; }
+.caution-right { left: 748px; }
+
+@media (max-width: 899px) {
+  .howto-main,
+  .howto-canvas,
+  .howto-caution,
+  .howto-caution-canvas {
+    height: auto;
+  }
+  .howto-canvas {
+    padding: 100px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+  .howto-intro,
+  .howto-step {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+  }
+  .howto-intro { height: 220px; }
+  .howto-logo { left: 0; width: 200px; height: auto; top: 60px; }
+  .howto-heading { left: 0; top: 160px; font-size: 22px; line-height: 34px; white-space: normal; }
+  .howto-intro.is-active .howto-logo { top: 0; }
+  .howto-intro.is-active .howto-heading { top: 90px; }
+  .howto-step { font-size: 16px; white-space: normal; }
+  .howto-step .pre { white-space: normal; }
+  .howto-step .lh54 { line-height: 32px; }
+  .howto-step .lh41 { line-height: 30px; }
+  .howto-caution-canvas {
+    padding: 48px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .caution-col {
+    position: relative;
+    left: auto;
+    top: auto;
+    white-space: normal;
+    font-size: 14px;
+  }
+  .caution-col .lh54 { line-height: 36px; }
+  .caution-col .lh28 { line-height: 24px; }
+}

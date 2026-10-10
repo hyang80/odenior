@@ -1,0 +1,319 @@
+/* ===== BRAND / Our Story (Figma 1:247, 1440×3570) ===== */
+.page-brand {
+  background: linear-gradient(to bottom, #fff 0%, #f9f4ef 72.367%);
+  min-height: calc(3570px * var(--zoom));
+}
+
+/* Hero — Rectangle 2828 (1514×910 @ -37,0, 1px black border) */
+.brand-hero {
+  height: calc(910px * var(--zoom));
+  /* Curtain: pinned once its bottom edge is in view; .brand-cover then slides over it */
+  position: sticky;
+  top: min(0px, calc(100vh - 910px * var(--zoom)));
+  z-index: 0;
+}
+.brand-cover {
+  position: relative;
+  z-index: 1;
+  /* the page gradient (#fff → #f9f4ef at 72.4% of 3570px) continued from y 910 */
+  background: linear-gradient(to bottom, #fdfbf9 0%, #f9f4ef 62.9%, #f9f4ef 100%);
+  box-shadow: 0 -24px 60px rgba(30, 25, 21, 0.12);
+}
+
+/* Line-by-line reveal: each .rv line goes blur → sharp, staggered by --i, once its
+   .rv-group is revealed (Brand.jsx); no movement */
+.rv {
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 1100ms cubic-bezier(0.33, 0, 0.15, 1), filter 1100ms cubic-bezier(0.33, 0, 0.15, 1);
+  transition-delay: calc(var(--i, 0) * 120ms);
+}
+.rv-group.is-revealed .rv {
+  opacity: 1;
+  filter: blur(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv {
+    opacity: 1;
+    filter: none;
+    transition: none;
+  }
+}
+.brand-hero-img {
+  position: absolute;
+  top: 0;
+  left: calc(-37px * var(--zoom));
+  width: max(calc(1514px * var(--zoom)), calc(100% + 74px * var(--zoom)));
+  height: 100%;
+  border: 1px solid #000;
+  overflow: hidden;
+}
+.brand-hero-canvas {
+  height: 910px;
+}
+
+/* Frame 78 (1440×771 @ 6,20) — copy reveals on arrival */
+.f78 {
+  left: 6px;
+  top: 20px;
+  width: 1440px;
+  height: 771px;
+}
+.f78-text {
+  left: 720.5px;
+  top: 322px;
+  transform: translateX(-50%);
+  font-size: 32px;
+  line-height: 64px;
+  letter-spacing: -0.64px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Body: 910 → 2596 */
+.brand-body {
+  height: calc(1686px * var(--zoom));
+}
+.brand-body-canvas {
+  height: 1686px;
+}
+
+/* Frame 79 (1440×712 @ 0,1014) — shown in its Figma Variant2 (settled) state */
+.f79 {
+  left: 0;
+  top: 104px;
+  width: 1440px;
+  height: 712px;
+  overflow: hidden;
+}
+.f79-text {
+  left: 719.5px;
+  top: 173px;
+  transform: translateX(-50%);
+  text-align: center;
+  font-weight: 500;
+  color: #000;
+  letter-spacing: -0.48px;
+  white-space: nowrap;
+}
+.f79-text p {
+  font-size: 28px;
+  line-height: 60px;
+}
+.f79-lead .fw-700 {
+  color: #39312b;
+}
+.f79 .f79-lead {
+  font-size: 24px;
+}
+.f79 .f79-line,
+.f79 .f79-gap {
+  font-size: 18px;
+  line-height: 50px;
+}
+
+/* Brand copy blocks — Frame 100 (@78,1683) / Frame 101 (@89,2269) */
+.f100 {
+  left: 78px;
+  top: 773px;
+  width: 1251px;
+  height: 319px;
+}
+.f101 {
+  left: 89px;
+  top: 1359px;
+  width: 1262px;
+  height: 199px;
+}
+.brand-copy {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 500;
+  color: #000;
+  letter-spacing: -0.44px;
+  white-space: nowrap;
+}
+.f101-copy {
+  width: 1262px;
+  white-space: pre-wrap;
+}
+.bc-title {
+  font-size: 32px;
+  line-height: 44px;
+}
+.bc-accent,
+.bc-accent-2 {
+  color: #7f6958;
+}
+.bc-accent-2 {
+  color: #6e5745;
+}
+/* "후각" settles into the accent colour once its block has revealed */
+.f101-accent {
+  transition: color 900ms var(--ease-out) 900ms;
+}
+.f101.is-revealed .f101-accent {
+  color: #7f6958;
+}
+.bc-gap {
+  font-size: 22px;
+  line-height: 29px;
+}
+.bc-body {
+  font-size: 22px;
+  line-height: 40px;
+}
+
+/* BEYOND PERFUME — video 1743×980 @ -71,2598, dim rgba(97,97,97,.55) hard-light.
+   The video is 60px taller top and bottom so it can drift (--par -1 → 1, Brand.jsx) slower
+   than the page without exposing an edge. */
+.brand-beyond {
+  height: calc(974px * var(--zoom));
+}
+.brand-beyond-video {
+  position: absolute;
+  top: calc(-58px * var(--zoom));
+  left: calc(-71px * var(--zoom));
+  width: max(calc(1743px * var(--zoom)), calc(100% + 142px * var(--zoom)));
+  height: calc(1100px * var(--zoom));
+  transform: translateY(calc(var(--par, 0) * 60px * var(--zoom)));
+  will-change: transform;
+}
+.brand-beyond-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(97, 97, 97, 0.55);
+  mix-blend-mode: hard-light;
+}
+.brand-beyond-canvas {
+  height: 974px;
+}
+/* Frame 83 (1439×950 @ 0,2620) — shown in its Variant2 position, lines reveal in view */
+.f83 {
+  left: 0;
+  top: 24px;
+  width: 1439px;
+  height: 950px;
+  overflow: hidden;
+}
+.f83-text {
+  left: 73px;
+  top: 329px;
+  width: 1225px;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: -0.44px;
+  white-space: pre-wrap;
+}
+.f83-title {
+  font-size: 32px;
+  line-height: 44px;
+}
+.f83-gap {
+  font-size: 22px;
+  line-height: 29px;
+}
+.f83-body {
+  font-size: 22px;
+  line-height: 40px;
+  font-weight: 400;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 899px) {
+  .page-brand {
+    min-height: 0;
+  }
+  .brand-hero {
+    height: 100svh;
+    top: 0;
+  }
+  .brand-hero-img {
+    left: 0;
+    width: 100%;
+    border-width: 0 0 1px;
+  }
+  .brand-hero-canvas {
+    height: 100%;
+  }
+  .f78,
+  .f79,
+  .f100,
+  .f101,
+  .f83 {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: auto;
+  }
+  .f78 {
+    height: 100%;
+  }
+  .f78-text {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 40px);
+    white-space: normal;
+    font-size: 22px;
+    line-height: 40px;
+  }
+  .brand-body,
+  .brand-body-canvas {
+    height: auto;
+  }
+  .brand-body-canvas {
+    padding: 100px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+  }
+  .f79-text {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    transform: none;
+    white-space: normal;
+  }
+  .f79-text .pre,
+  .brand-copy .pre {
+    white-space: normal;
+  }
+  .f79 .f79-lead { font-size: 20px !important; line-height: 40px; }
+  .f79 .f79-line { font-size: 15px !important; line-height: 30px !important; }
+  .brand-copy {
+    position: relative;
+    width: 100%;
+    white-space: normal;
+  }
+  .bc-title { font-size: 24px; line-height: 34px; }
+  .bc-body { font-size: 16px; line-height: 30px; }
+  .brand-beyond {
+    height: auto;
+    min-height: 100svh;
+  }
+  .brand-beyond-video {
+    inset: -60px 0;
+    width: 100%;
+    height: auto;
+  }
+  .brand-beyond-canvas {
+    height: auto;
+    min-height: 100svh;
+    padding: 120px 20px 80px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .f83-text {
+    position: relative;
+    left: auto;
+    top: auto !important;
+    width: 100%;
+  }
+  .f83-title { font-size: 24px; line-height: 34px; }
+  .f83-body { font-size: 16px; line-height: 30px; }
+}

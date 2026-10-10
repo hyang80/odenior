@@ -1,0 +1,371 @@
+/* ===== PRODUCT / Perfume (Figma 1:330 "Frame 92", 1440×2915, white) ===== */
+.page-product {
+  background: #fff;
+}
+
+/* Hero — image 678 (1612×889 @ -94,0) + gradient (1441×495, 64%) */
+.product-hero {
+  height: calc(889px * var(--zoom));
+}
+.product-hero-img {
+  position: absolute;
+  top: 0;
+  left: calc(-94px * var(--zoom));
+  width: max(calc(1612px * var(--zoom)), calc(100% + 172px * var(--zoom)));
+  height: 100%;
+  overflow: hidden;
+}
+.product-hero-img img {
+  position: absolute;
+  left: -0.03%;
+  top: 0;
+  width: 100.06%;
+  height: 101.24%;
+  max-width: none;
+  object-fit: cover;
+}
+.product-hero-gradient {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(495px * var(--zoom));
+  opacity: 0.64;
+  background-image: linear-gradient(180.05deg, rgb(61, 46, 38) 11.757%, rgba(238, 230, 219, 0) 99.869%);
+}
+.product-hero-canvas {
+  height: 889px;
+}
+.product-system {
+  left: 84px;
+  top: 177px;
+  font-weight: 500;
+  color: #402e2e;
+  white-space: nowrap;
+}
+.ps-title {
+  font-size: 26px;
+  line-height: 51px;
+}
+.ps-l51 {
+  font-size: 18px;
+  line-height: 51px;
+}
+.ps-l38 {
+  font-size: 18px;
+  line-height: 38px;
+}
+.product-record {
+  left: 80px;
+  top: 658px;
+  font-size: 26px;
+  line-height: 51px;
+  font-weight: 500;
+  color: #402e2e;
+  white-space: nowrap;
+}
+
+/* ODD SERIES — Frame 121 (1440×810 @ y1003 in Frame 118), white band y889–1927 */
+.product-series {
+  height: calc(1038px * var(--zoom));
+  background: #fff;
+}
+.product-series-canvas {
+  height: 1038px;
+}
+/* Offsets below are Frame 121 coordinates + 114px (its top within the band) */
+.series-title {
+  left: 80px;
+  top: 217px;
+  width: 225px;
+  font-size: 54px;
+  line-height: 62px;
+  font-weight: 500;
+  color: #000;
+}
+.series-desc {
+  left: 80px;
+  top: 373px;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 500;
+  color: #424242;
+  white-space: nowrap;
+}
+/* DF-N / VA-Ai / VA-Am stacked in place; switching swaps instantly (no transition) */
+.series-variant {
+  position: absolute;
+  left: 0;
+  top: 114px;
+  width: 1440px;
+  height: 810px;
+  visibility: hidden;
+}
+.series-variant.is-active {
+  visibility: visible;
+}
+/* AiEULE slot: <model-viewer> (PerfumeModel) in place of image 514 */
+/* The canvas is 1.4× the slot (centred) and the camera sits 1.4× further back (PerfumeModel
+   radius 120% vs 86%), so the bottle keeps the slot's size but has room to tilt without clipping */
+.series-model.fill {
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+}
+.series-model {
+  display: block;
+  background: transparent;
+  --poster-color: transparent;
+  object-fit: cover;
+  cursor: grab;
+}
+.series-model:active {
+  cursor: grabbing;
+}
+/* Ellipse (7px) + 13px label */
+.series-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 13px;
+  line-height: normal;
+  font-weight: 500;
+  color: #000;
+  white-space: nowrap;
+}
+.series-label {
+  left: 80px;
+  top: 622px;
+  font-weight: 500;
+  color: #000;
+  white-space: nowrap;
+}
+.sl-name { font-size: 36px; line-height: normal; }
+.sl-sub span:first-child { font-size: 24px; line-height: 40px; color: #828282; }
+.sl-gap { font-size: 16px; line-height: 24px; }
+.sl-size { font-size: 20px; line-height: normal; }
+.series-buttons {
+  left: 1098px;
+  top: 804px;
+  width: 244px;
+  height: 60px;
+  z-index: 1;
+}
+.series-btn {
+  position: absolute;
+  top: 0;
+  width: 60px;
+  height: 60px;
+}
+
+/* ODD OBJECT SERIES row (820px) */
+.product-object {
+  height: calc(820px * var(--zoom));
+}
+.product-object-canvas {
+  height: 820px;
+}
+.po-left-bg {
+  left: 2px;
+  top: 0;
+  width: 719px;
+  height: 820px;
+}
+.po-left-bg img {
+  opacity: 0.25;
+}
+.po-left-photo {
+  left: -8.06px;
+  top: 0;
+  width: 727.06px;
+  height: 820px;
+  transform: scaleX(-1);
+  opacity: 0.89;
+}
+.po-panel {
+  left: 720px;
+  top: 0;
+  width: 719px;
+  height: 820px;
+}
+.po-panel-bg {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 720px;
+  height: 821px;
+  overflow: hidden;
+}
+.po-panel-tint {
+  background: rgba(199, 180, 167, 0.81);
+}
+.po-copy {
+  left: 359.5px;
+  top: 167px;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #fffaf7;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.po-title {
+  font-size: 32px;
+  line-height: 51px;
+}
+.po-body {
+  font-size: 22px;
+  line-height: 51px;
+}
+.po-cta {
+  left: 93px;
+  top: 619px;
+  width: 533px;
+  height: 68px;
+  display: block;
+  cursor: pointer;
+}
+.po-cta-pill {
+  position: absolute;
+  inset: 0;
+  border: 1px solid #fff;
+  border-radius: 100px;
+  background: rgba(101, 91, 84, 0);
+  transition: background-color 200ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+.po-cta.is-active .po-cta-pill {
+  background: rgba(101, 91, 84, 0.58);
+  opacity: 0.72;
+  transition-timing-function: var(--ease-in);
+}
+.po-cta-label {
+  position: absolute;
+  left: 266px;
+  top: 8px;
+  transform: translateX(-50%);
+  font-size: 32px;
+  line-height: 51px;
+  color: #fff;
+  white-space: nowrap;
+}
+.product-tail {
+  height: calc(556px * var(--zoom));
+}
+
+@media (max-width: 899px) {
+  .product-hero {
+    height: 100svh;
+  }
+  .product-hero-img {
+    left: 0;
+    width: 100%;
+  }
+  .product-hero-gradient {
+    height: 60%;
+  }
+  .product-hero-canvas {
+    height: 100%;
+    padding: 110px 20px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .product-system,
+  .product-record {
+    position: relative;
+    left: auto;
+    top: auto;
+    white-space: normal;
+  }
+  .product-record .pre { white-space: normal; }
+  .ps-title { font-size: 22px; line-height: 40px; }
+  .ps-l51,
+  .ps-l38 { font-size: 14px; line-height: 26px; }
+  .product-record { font-size: 18px; line-height: 32px; }
+  .product-series,
+  .product-series-canvas {
+    height: auto;
+  }
+  .product-series-canvas {
+    position: relative;
+    width: 100%;
+    padding: 56px 20px 40px;
+  }
+  .series-title,
+  .series-desc {
+    position: relative;
+    left: auto;
+    top: auto;
+  }
+  .series-title { font-size: 36px; line-height: 44px; }
+  .series-desc { margin-top: 16px; font-size: 15px; line-height: 22px; white-space: normal; }
+  .series-variant {
+    position: relative;
+    top: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    margin-top: 24px;
+  }
+  .series-variant:not(.is-active) {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    width: auto;
+  }
+  .series-variant .series-img {
+    left: 22% !important;
+    top: 0 !important;
+    width: 56% !important;
+    height: 72% !important;
+  }
+  .series-tag { display: none; }
+  .series-label { left: 0; top: auto; bottom: 0; }
+  .sl-name { font-size: 24px; }
+  .sl-sub span:first-child { font-size: 16px; line-height: 26px; }
+  .sl-gap { display: none; }
+  .sl-size { font-size: 14px; }
+  .series-buttons {
+    position: relative;
+    left: auto;
+    top: auto;
+    margin: 20px 0 0 auto;
+    transform: scale(0.75);
+    transform-origin: right center;
+  }
+  .product-object,
+  .product-object-canvas {
+    height: auto;
+  }
+  .product-object-canvas {
+    display: flex;
+    flex-direction: column;
+  }
+  .po-left-bg { display: none; }
+  .po-left-photo,
+  .po-panel {
+    position: relative;
+    left: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 719 / 820;
+  }
+  .po-left-photo { order: 0; }
+  .po-panel { order: 1; }
+  .po-panel-bg { width: 100%; height: 100%; top: 0; }
+  .po-copy { left: 50%; top: 12%; white-space: normal; width: calc(100% - 40px); }
+  .po-copy .pre { white-space: normal; }
+  .po-title { font-size: 24px; line-height: 36px; }
+  .po-body { font-size: 15px; line-height: 30px; }
+  .po-cta {
+    left: 50%;
+    top: auto;
+    bottom: 10%;
+    width: calc(100% - 40px);
+    max-width: 533px;
+    height: 56px;
+    transform: translateX(-50%);
+  }
+  .po-cta-label { left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 22px; }
+  .product-tail { height: 80px; }
+}

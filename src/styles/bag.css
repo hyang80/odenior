@@ -1,0 +1,209 @@
+/* ===== BAG (Bag.jsx) — static cart, laid out on the 1440 canvas like the other pages ===== */
+.page-bag {
+  background: #fff;
+}
+.bag-main {
+  width: 1440px;
+  margin: 0 auto;
+  zoom: var(--zoom);
+  padding: 170px 87px 40px;
+  color: #402e2e;
+}
+.bag-title {
+  margin: 0;
+  font-size: 48px;
+  line-height: 65px;
+  font-weight: 600;
+  color: #6a5f5f;
+}
+.bag-count {
+  margin-top: 12px;
+  font-size: 16px;
+  color: #988d85;
+}
+.bag-count span {
+  color: #7a6659;
+  font-weight: 600;
+}
+
+.bag-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 56px;
+  align-items: start;
+  margin-top: 56px;
+}
+
+.bag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #7a6659;
+}
+.bag-head,
+.bag-item {
+  display: grid;
+  grid-template-columns: 1fr 100px 160px;
+  align-items: center;
+}
+.bag-head {
+  padding: 16px 0;
+  border-bottom: 1px solid #e3ddd8;
+  font-size: 14px;
+  color: #988d85;
+}
+.bag-head span:not(:first-child),
+.bag-qty,
+.bag-price {
+  text-align: center;
+}
+.bag-price {
+  text-align: right;
+}
+.bag-head span:last-child {
+  text-align: right;
+}
+.bag-item {
+  padding: 28px 0;
+  border-bottom: 1px solid #e3ddd8;
+}
+.bag-product {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.bag-thumb {
+  position: relative;
+  flex: none;
+  width: 140px;
+  height: 170px;
+  background: #f5f4f3;
+  overflow: hidden;
+}
+.bag-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.bag-name {
+  font-size: 22px;
+  font-weight: 600;
+  color: #6a5f5f;
+}
+.bag-sub {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #988d85;
+}
+.bag-desc {
+  margin-top: 18px;
+  font-size: 15px;
+}
+.bag-option {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #988d85;
+}
+.bag-qty {
+  font-size: 16px;
+}
+.bag-price {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.bag-summary {
+  padding: 32px 28px;
+  background: #f8f8f7;
+}
+.bag-summary-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #6a5f5f;
+}
+.bag-summary dl {
+  margin: 24px 0 0;
+}
+.bag-summary dl > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 15px;
+}
+.bag-summary dt {
+  color: #988d85;
+}
+.bag-summary dd {
+  margin: 0;
+}
+.bag-summary .bag-total {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid #e3ddd8;
+  font-size: 17px;
+  font-weight: 600;
+}
+.bag-summary .bag-total dt {
+  color: #402e2e;
+}
+.bag-order {
+  width: 100%;
+  height: 54px;
+  margin-top: 28px;
+  background: #7a6659;
+  color: #fff;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  transition: background-color 200ms linear;
+}
+.bag-order:hover {
+  background: #6a5f5f;
+}
+.bag-continue {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #988d85;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+@media (max-width: 899px) {
+  .bag-main {
+    width: 100%;
+    padding: 100px 20px 24px;
+  }
+  .bag-title {
+    font-size: 32px;
+    line-height: 44px;
+  }
+  .bag-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-top: 32px;
+  }
+  .bag-head {
+    display: none;
+  }
+  .bag-item {
+    grid-template-columns: 1fr auto;
+    row-gap: 16px;
+  }
+  .bag-product {
+    grid-column: 1 / -1;
+    gap: 20px;
+  }
+  .bag-thumb {
+    width: 100px;
+    height: 122px;
+  }
+  .bag-qty {
+    text-align: left;
+    font-size: 14px;
+    color: #988d85;
+  }
+  .bag-qty::before {
+    content: '수량 ';
+  }
+}

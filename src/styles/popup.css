@@ -1,0 +1,204 @@
+/* Header utility popups (UtilPopup.jsx) — above the header (100), below the opening (9000) */
+.popup {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+.popup.is-open {
+  pointer-events: auto;
+}
+.popup-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(64, 46, 46, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+.popup.is-open .popup-backdrop {
+  opacity: 1;
+}
+
+.popup-panel {
+  position: absolute;
+  background: #f8f8f7;
+  color: #402e2e;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out), transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.popup.is-open .popup-panel {
+  opacity: 1;
+  transform: none;
+}
+
+/* Close — two thin crossed lines, like the mobile menu toggle */
+.popup-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+}
+.popup-close::before,
+.popup-close::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 50%;
+  height: 1.5px;
+  background: #988d85;
+}
+.popup-close::before { transform: rotate(45deg); }
+.popup-close::after { transform: rotate(-45deg); }
+
+/* --- Search: a panel that drops down from the top --- */
+.search-panel {
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 120px max(24px, calc(50% - 440px)) 72px;
+  transform: translateY(-24px);
+  box-shadow: 0 24px 60px rgba(30, 25, 21, 0.08);
+}
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid #7a6659;
+  padding-bottom: 14px;
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 28px;
+  font-weight: 500;
+  color: #402e2e;
+  background: none;
+  border: 0;
+  outline: none;
+  padding: 0;
+}
+.search-input::placeholder {
+  color: #c9c2bd;
+}
+.search-submit {
+  font-size: 18px;
+  color: #7a6659;
+}
+.search-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+.search-suggest-label {
+  margin-right: 10px;
+  font-size: 14px;
+  color: #988d85;
+}
+.search-chip {
+  padding: 8px 16px;
+  border: 1px solid #ddd6d0;
+  border-radius: 999px;
+  font-size: 14px;
+  color: #7a6659;
+  transition: background-color 200ms linear;
+}
+.search-chip:hover {
+  background: #efebe7;
+}
+
+/* --- Login: a centred card --- */
+.login-panel {
+  top: 50%;
+  left: 50%;
+  width: min(420px, calc(100% - 32px));
+  padding: 56px 44px 40px;
+  transform: translate(-50%, calc(-50% + 24px));
+  box-shadow: 0 24px 80px rgba(30, 25, 21, 0.14);
+}
+.popup.is-open .login-panel {
+  transform: translate(-50%, -50%);
+}
+.login-logo {
+  margin: 0 auto 40px;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.login-field span {
+  font-size: 13px;
+  color: #988d85;
+}
+.login-field input {
+  font: inherit;
+  font-size: 16px;
+  color: #402e2e;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid #d6cec8;
+  border-radius: 0;
+  outline: none;
+  padding: 6px 0 10px;
+  transition: border-color 200ms linear;
+}
+.login-field input:focus {
+  border-bottom-color: #7a6659;
+}
+.login-field input::placeholder {
+  color: #c9c2bd;
+}
+.login-submit {
+  margin-top: 14px;
+  height: 52px;
+  background: #7a6659;
+  color: #fff;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  transition: background-color 200ms linear;
+}
+.login-submit:hover {
+  background: #6a5f5f;
+}
+.login-links {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #988d85;
+}
+.login-bar {
+  color: #d6cec8;
+}
+
+@media (max-width: 899px) {
+  .search-panel {
+    padding: 84px 20px 40px;
+  }
+  .search-input {
+    font-size: 20px;
+  }
+  .login-panel {
+    padding: 48px 24px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup-backdrop,
+  .popup-panel {
+    transition: none;
+  }
+}
