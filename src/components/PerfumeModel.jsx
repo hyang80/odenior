@@ -13,7 +13,8 @@ import { attachLiquidSlosh } from './liquidSlosh.js';
  * sides), so front and back read the same tone and shading only falls on the sides; `materials` can
  * override colours per glTF material: { [name]: { color: [r, g, b, a] (linear), roughness,
  * metallic, emissive: [r, g, b], alphaMode, texture: null, renderOrder, clearcoat, clearcoatRoughness,
- * smooth: angle° } } (`smooth` re-shades a faceted part smoothly, see smoothNormals)
+ * smooth: angle°, closeHoles: true, plug: { radius, height } } } (`smooth` re-shades a faceted part smoothly, see
+ * smoothNormals; `closeHoles` seals an open mesh, see closeHoles; `plug` adds a neck, see addNeckPlug)
  * (`texture: null` drops an exported base-colour texture; parts exported without a material are
  * listed as "Default") — a faint emissive lifts a part's shadows
  * without relighting; renderOrder pins the draw order of see-through parts (three.js otherwise sorts
@@ -63,7 +64,204 @@ function smoothNormals(geometry, angle) {
   geometry.userData.smoothed = true;
 }
 
-export default function PerfumeModel({ src, poster, alt, className, materials, liquid, framing }) {
+/*
+ * Seal open holes in a mesh (the AMANT knot export is open where it was cut from its neck): edges
+ * used by a single triangle are chained into loops and each loop is closed with a fan around its
+ * centroid, wound like the surrounding faces. Adds geometry only; existing faces are untouched.
+ */
+function closeHoles(geometry) {
+  if (geometry.userData.holesClosed) return;
+  geometry.userData.holesClosed = true;
+  const pos = geometry.attributes.position;
+  const index = geometry.index;
+  if (!pos || !index) return;
+  const key = (i) => `${Math.round(pos.getX(i) * 1e5)},${Math.round(pos.getY(i) * 1e5)},${Math.round(pos.getZ(i) * 1e5)}`;
+  const canonOf = new Map();
+  const canon = new Int32Array(pos.count);
+  for (let i = 0; i < pos.count; i++) {
+    const k = key(i);
+    if (!canonOf.has(k)) canonOf.set(k, i);
+    canon[i] = canonOf.get(k);
+  }
+  // directed edges as they appear in triangles; an edge is open when its reverse never appears
+  const directed = new Map();
+  const tri = index.array;
+  for (let t = 0; t < tri.length; t += 3) {
+    for (let e = 0; e < 3; e++) {
+      const a = canon[tri[t + e]];
+      const b = canon[tri[t + ((e + 1) % 3)]];
+      directed.set(`${a}_${b}`, [a, b]);
+    }
+  }
+  // open edges a→b, walked into closed loops (a vertex can start several open edges where two
+  // holes touch, so each step takes any unused edge leaving the current vertex)
+  const open = [];
+  directed.forEach(([a, b]) => {
+    if (!directed.has(`${b}_${a}`)) open.push([a, b]);
+  });
+  if (!open.length) return;
+  const out = new Map();
+  open.forEach((e, i) => {
+    if (!out.has(e[0])) out.set(e[0], []);
+    out.get(e[0]).push(i);
+  });
+  const used = new Uint8Array(open.length);
+  const loops = [];
+  for (let i = 0; i < open.length; i++) {
+    if (used[i]) continue;
+    const start = open[i][0];
+    const loop = [];
+    let e = i;
+    while (e !== undefined && !used[e]) {
+      used[e] = 1;
+      loop.push(open[e][0]);
+      const v = open[e][1];
+      if (v === start) break;
+      e = (out.get(v) || []).find((j) => !used[j]);
+    }
+    if (loop.length >= 3 && open[e]?.[1] === start) loops.push(loop);
+  }
+  if (!loops.length) return;
+
+  const names = Object.keys(geometry.attributes);
+  const extra = loops.length;
+  const grown = {};
+  names.forEach((n) => {
+    const attr = geometry.attributes[n];
+    const arr = new attr.array.constructor((pos.count + extra) * attr.itemSize);
+    arr.set(attr.array);
+    grown[n] = arr;
+  });
+  const newIndex = Array.from(tri);
+  loops.forEach((loop, li) => {
+    const c = pos.count + li;
+    names.forEach((n) => {
+      const attr = geometry.attributes[n];
+      for (let k = 0; k < attr.itemSize; k++) {
+        let sum = 0;
+        loop.forEach((v) => {
+          sum += attr.array[v * attr.itemSize + k];
+        });
+        grown[n][c * attr.itemSize + k] = sum / loop.length;
+      }
+    });
+    // boundary edge a→b belongs to a face wound a→b, so the patch is wound b→a→centre
+    let nx = 0;
+    let ny = 0;
+    let nz = 0;
+    loop.forEach((a, i) => {
+      const b = loop[(i + 1) % loop.length];
+      newIndex.push(b, a, c);
+      // Newell's method on the reversed loop → the patch's outward normal
+      const ax = pos.getX(a);
+      const ay = pos.getY(a);
+      const az = pos.getZ(a);
+      const bx = pos.getX(b);
+      const by = pos.getY(b);
+      const bz = pos.getZ(b);
+      nx += (by - ay) * (bz + az);
+      ny += (bz - az) * (bx + ax);
+      nz += (bx - ax) * (by + ay);
+    });
+    if (grown.normal) {
+      const len = Math.hypot(nx, ny, nz) || 1;
+      grown.normal.set([-nx / len, -ny / len, -nz / len], c * 3);
+    }
+  });
+  names.forEach((n) => {
+    const attr = geometry.attributes[n];
+    geometry.setAttribute(n, new attr.constructor(grown[n], attr.itemSize, attr.normalized));
+  });
+  geometry.setIndex(newIndex);
+  geometry.computeBoundingSphere();
+}
+
+/*
+ * A smooth neck plug under a knot whose export has no neck piece (AiEULE): the knot's underside
+ * has a rough socket where the neck was cut out. A closed cylinder (radius, height in model
+ * units) is added in the knot's own material, centred under the knot's lowest band and standing
+ * on its lowest point — the same neck the other bottles ship with — so the socket is filled.
+ */
+function addNeckPlug(mesh, { radius, height, segments = 48 }) {
+  if (mesh.userData.plugged) return;
+  mesh.userData.plugged = true;
+  const pos = mesh.geometry.attributes.position;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (let i = 0; i < pos.count; i++) {
+    minY = Math.min(minY, pos.getY(i));
+    maxY = Math.max(maxY, pos.getY(i));
+  }
+  let cx = 0;
+  let cz = 0;
+  let n = 0;
+  const band = minY + 0.03 * (maxY - minY);
+  for (let i = 0; i < pos.count; i++) {
+    if (pos.getY(i) > band) continue;
+    cx += pos.getX(i);
+    cz += pos.getZ(i);
+    n++;
+  }
+  cx /= n || 1;
+  cz /= n || 1;
+  const y0 = minY;
+  const y1 = minY + height;
+  const P = [];
+  const N = [];
+  const I = [];
+  // side: a ring at the bottom and one at the top, outward normals
+  for (let s = 0; s <= segments; s++) {
+    const a = (s / segments) * Math.PI * 2;
+    const x = Math.cos(a);
+    const z = Math.sin(a);
+    P.push(cx + radius * x, y0, cz + radius * z, cx + radius * x, y1, cz + radius * z);
+    N.push(x, 0, z, x, 0, z);
+  }
+  for (let s = 0; s < segments; s++) {
+    const a = s * 2;
+    I.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+  }
+  // flat caps
+  [
+    [y0, -1],
+    [y1, 1],
+  ].forEach(([y, ny]) => {
+    const c = P.length / 3;
+    P.push(cx, y, cz);
+    N.push(0, ny, 0);
+    for (let s = 0; s <= segments; s++) {
+      const a = (s / segments) * Math.PI * 2;
+      P.push(cx + radius * Math.cos(a), y, cz + radius * Math.sin(a));
+      N.push(0, ny, 0);
+    }
+    for (let s = 0; s < segments; s++) {
+      if (ny < 0) I.push(c, c + 1 + s, c + 2 + s);
+      else I.push(c, c + 2 + s, c + 1 + s);
+    }
+  });
+  const Attr = pos.constructor;
+  const geometry = new mesh.geometry.constructor();
+  geometry.setAttribute('position', new Attr(new Float32Array(P), 3));
+  geometry.setAttribute('normal', new Attr(new Float32Array(N), 3));
+  geometry.setIndex(I);
+  const plug = new mesh.constructor(geometry, mesh.material);
+  plug.userData.plugged = true; // it shares the knot's material: never plug the plug
+  plug.renderOrder = mesh.renderOrder;
+  mesh.add(plug);
+}
+
+export default function PerfumeModel({
+  src,
+  poster,
+  alt,
+  className,
+  materials,
+  liquid,
+  framing,
+  only,
+  still = false,
+  onViewer,
+}) {
   const viewerRef = useRef(null);
   const [ready, setReady] = useState(() => typeof customElements !== 'undefined' && !!customElements.get('model-viewer'));
 
@@ -101,6 +299,8 @@ export default function PerfumeModel({ src, poster, alt, className, materials, l
         if (!o) return;
         if (o.renderOrder != null) obj.renderOrder = o.renderOrder;
         if (o.smooth) smoothNormals(obj.geometry, o.smooth);
+        if (o.closeHoles) closeHoles(obj.geometry);
+        if (o.plug) addNeckPlug(obj, o.plug);
         // glossy top coat over a matte base (three.js MeshPhysicalMaterial), colour untouched
         if (o.clearcoat != null && 'clearcoat' in obj.material) {
           obj.material.clearcoat = o.clearcoat;
@@ -164,6 +364,29 @@ export default function PerfumeModel({ src, poster, alt, className, materials, l
     };
   }, [ready, fovTarget]);
 
+  // `only`: material names to keep — every other part is hidden (e.g. just the knot cap)
+  const onlyKey = only?.join('|');
+  useEffect(() => {
+    const mv = viewerRef.current;
+    if (!ready || !mv || !onlyKey) return undefined;
+    const keep = onlyKey.split('|');
+    const apply = () => {
+      const sceneKey = Object.getOwnPropertySymbols(mv).find((k) => k.description === 'scene');
+      const scene = sceneKey && mv[sceneKey];
+      scene?.traverse((obj) => {
+        if (obj.isMesh) obj.visible = keep.includes(obj.material?.name);
+      });
+      scene?.queueRender?.();
+    };
+    if (mv.loaded) apply();
+    mv.addEventListener('load', apply);
+    return () => mv.removeEventListener('load', apply);
+  }, [ready, onlyKey]);
+
+  useEffect(() => {
+    if (ready && viewerRef.current) onViewer?.(viewerRef.current);
+  }, [ready, onViewer]);
+
   if (!ready) return <img src={poster} alt={alt} className={className} />;
   // `framing` ({ target, radius, fov: the camera's effective vertical FOV }) pins the camera so
   // several models render at one scale;
@@ -177,13 +400,13 @@ export default function PerfumeModel({ src, poster, alt, className, materials, l
       src={src}
       poster={poster}
       alt={alt}
-      camera-controls=""
+      camera-controls={still ? undefined : ''}
       disable-zoom=""
       disable-pan=""
       touch-action="pan-y"
       orbit-sensitivity="2.1"
       interaction-prompt="none"
-      auto-rotate=""
+      auto-rotate={still ? undefined : ''}
       auto-rotate-delay="1500"
       rotation-per-second="18deg"
       camera-orbit={`0deg 80deg ${radius}`}

@@ -19,6 +19,8 @@ export default function Product() {
           <img src="/assets/10b6f.png" alt="" />
         </div>
         <div className="product-hero-gradient" />
+        {/* only the top of the hero is dark (under the gradient); the photo below it is light */}
+        <div className="product-hero-tone" data-header-tone="dark" aria-hidden="true" />
         <div className="canvas product-hero-canvas">
           <div className="abs product-system">
             <p className="ps-title fw-600">FRAGRANCE SYSTEM</p>
@@ -45,7 +47,7 @@ export default function Product() {
         </div>
       </section>
 
-      <section className="section product-object">
+      <section className="section product-object" data-header-tone="dark">
         <div className="canvas product-object-canvas">
           <div className="abs po-left-bg">
             <img src="/assets/8528e.png" alt="" className="fill cover" />

@@ -187,7 +187,7 @@ function OurStory() {
   const nav = useNav();
   const { active, ref, bind } = useVariant({ revealOnView: true });
   return (
-    <section className="section our-story" ref={ref}>
+    <section className="section our-story" ref={ref} data-header-tone="dark">
       <a
         href="/brand"
         className={`our-story-link${active ? ' is-active' : ''}`}
@@ -255,7 +255,7 @@ function Split() {
   return (
     <section className="section split">
       <div className="canvas split-canvas">
-        <div className={`abs split-left${left.active ? ' is-active' : ''}`} {...left.bind}>
+        <div className={`abs split-left${left.active ? ' is-active' : ''}`} {...left.bind} data-header-tone="dark">
           <img src="/assets/b839f.png" alt="" className="fill" />
           <div className="abs split-badge split-badge-blur">
             <img src="/assets/b3bbd.png" alt="" className="fill cover" />
@@ -269,7 +269,7 @@ function Split() {
             <p className="abs split-left-more fw-500">자세히 보기</p>
           </div>
         </div>
-        <div className={`abs split-right${right.active ? ' is-active' : ''}`} {...right.bind}>
+        <div className={`abs split-right${right.active ? ' is-active' : ''}`} {...right.bind} data-header-tone="dark">
           <video ref={videoRef} className="fill" src="/videos/mov.mp4" muted loop playsInline preload="auto" />
           <div className="split-right-hover">
             <div className="fill split-right-dim" />

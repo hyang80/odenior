@@ -1,0 +1,40 @@
+/* ===== Object motion study (Figma 1:258 "Frame 91", 1440×8030, white) — ObjectMotion.jsx ===== */
+.page-motion {
+  background: #fff;
+  padding: calc(118px * var(--zoom)) 0 calc(196px * var(--zoom));
+}
+/* Frames 141:3360 / 141:3361 / 141:3368 — 2560 tall in Figma; run 1.4× longer here so each knot's
+   S takes more scrolling (slower) */
+.motion-frame {
+  position: relative;
+  height: calc(3600px * var(--zoom));
+}
+.motion-frame:last-child {
+  margin-top: calc(36px * var(--zoom));
+}
+.motion-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+}
+.motion-knot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(300px * var(--zoom));
+  height: calc(300px * var(--zoom));
+  will-change: transform;
+}
+.motion-model {
+  display: block;
+  background: transparent;
+  --poster-color: transparent;
+}
+
+@media (max-width: 899px) {
+  .motion-frame {
+    height: 2000px;
+  }
+}

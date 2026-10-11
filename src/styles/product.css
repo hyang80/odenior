@@ -36,6 +36,15 @@
 .product-hero-canvas {
   height: 889px;
 }
+/* header tone area (Header.jsx): the darkest part of the gradient */
+.product-hero-tone {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(300px * var(--zoom));
+  pointer-events: none;
+}
 .product-system {
   left: 84px;
   top: 177px;

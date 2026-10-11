@@ -10,6 +10,7 @@ import Brand from './pages/Brand.jsx';
 import ObjectStory from './pages/ObjectStory.jsx';
 import Product from './pages/Product.jsx';
 import HowToUse from './pages/HowToUse.jsx';
+import ObjectMotion from './pages/ObjectMotion.jsx';
 import Bag from './pages/Bag.jsx';
 import { useCanvasZoom } from './hooks/useCanvasZoom.js';
 
@@ -45,6 +46,7 @@ export default function App() {
       '/product': 'Perfume — odenior',
       '/how-to-use': 'How to use — odenior',
       '/bag': 'Bag — odenior',
+      '/object-motion': 'Object motion — odenior',
     };
     document.title = titles[pathname] ?? 'odenior';
   }, [pathname]);
@@ -60,6 +62,7 @@ export default function App() {
           <Route path="/product" element={<Product />} />
           <Route path="/how-to-use" element={<HowToUse />} />
           <Route path="/bag" element={<Bag />} />
+          <Route path="/object-motion" element={<ObjectMotion />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </PageTransition>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../styles/header.css';
 import { OPENING_EVENT } from './Opening.jsx';
@@ -38,7 +38,61 @@ const MENUS = [
   },
 ];
 
+/*
+ * Header tone: every page section marks the background it shows with data-header-tone="light" |
+ * "dark" (sub-areas like one half of a split row can mark themselves too). Each header item —
+ * menu labels, logo, utilities, dropdown items — looks up the topmost marked area under its own
+ * centre and takes that tone (data-tone), so it stays legible on photos, white bands and the dark
+ * curtain alike; colours ease over 300ms. Unmarked areas count as light.
+ */
+const PROBES = '.nav-label, .util, .header-logo, .dd-item';
+
+function toneAt(x, y) {
+  const areas = document.querySelectorAll('[data-header-tone]');
+  let tone = 'light';
+  // later in the DOM = painted on top (covers, curtains, nested halves)
+  areas.forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) tone = el.dataset.headerTone;
+  });
+  return tone;
+}
+
+function useHeaderTone(rootRef, pathname) {
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      root.querySelectorAll(PROBES).forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (!r.width) return;
+        const tone = toneAt(r.left + r.width / 2, r.top + r.height / 2);
+        if (el.dataset.tone !== tone) el.dataset.tone = tone;
+      });
+    };
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    schedule();
+    // pages fade in and lay out after the route change; pinned layers move without scrolling
+    const timers = [120, 400, 900].map((t) => setTimeout(schedule, t));
+    const tick = setInterval(schedule, 500);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      cancelAnimationFrame(raf);
+      timers.forEach(clearTimeout);
+      clearInterval(tick);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
+  }, [rootRef, pathname]);
+}
+
 export default function Header({ variant }) {
+  const rootRef = useRef(null);
   const [hover, setHover] = useState(false);
   const [menu, setMenu] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -46,6 +100,7 @@ export default function Header({ variant }) {
   const [popup, setPopup] = useState(null); // 'search' | 'login' | null
   const closePopup = useCallback(() => setPopup(null), []);
   const location = useLocation();
+  useHeaderTone(rootRef, location.pathname);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -66,6 +121,7 @@ export default function Header({ variant }) {
 
   return (
     <header
+      ref={rootRef}
       className={`site-header${hover ? ' is-hover' : ''}${menu ? ' is-menu' : ''}${mobileOpen ? ' is-mobile-open' : ''}${scrolled ? ' is-scrolled' : ''}`}
       style={{ '--menu-fade': `${activeMenu?.fade ?? 300}ms` }}
       onMouseEnter={() => setHover(true)}

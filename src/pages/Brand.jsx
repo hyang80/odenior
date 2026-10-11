@@ -167,7 +167,7 @@ export default function Brand() {
 
   return (
     <main className="page page-brand">
-      <section className="section brand-top" ref={topRef}>
+      <section className="section brand-top" ref={topRef} data-header-tone="dark">
         <div className="canvas brand-top-canvas">
           {/* image 691 (1440×4187 @ 0,-89) */}
           <img src="/assets/ourstory-bg.jpg" alt="" className="abs brand-bg" />
@@ -251,7 +251,7 @@ export default function Brand() {
 
       {/* Frame 127 (@ -36,2777 incl. its fade): slides up over the pinned photo — fade to black, atomizer
           video, BEYOND PERFUME */}
-      <section className="section brand-cover" ref={coverRef}>
+      <section className="section brand-cover" ref={coverRef} data-header-tone="dark">
         <div className="brand-fade" />
         <div className="canvas brand-cover-canvas">
           <div className="abs brand-beyond" ref={beyondRef}>

@@ -28,7 +28,7 @@
 
 .nav-label,
 .util {
-  color: #b3aeab;
+  color: #84746a;
   font-weight: 400;
 }
 .nav-label {
@@ -67,12 +67,13 @@
 .header-logo img {
   width: 100%;
   height: 100%;
+  transition: filter var(--header-fade, 300ms) linear;
 }
 
 /* Frame 66 overlay: whole-header hover (dissolve 300ms linear) */
 .site-header.is-hover .nav-label,
 .site-header.is-hover .util {
-  color: #988d85;
+  color: #5f4d42;
 }
 
 /* Frame 62 / 64 / 65 dropdown overlays */
@@ -112,6 +113,30 @@ a.dd-item:hover {
 .dd-how-to-use,
 .dd-how-to-make { left: 19px; }
 
+/* Tone over dark areas (data-tone set per item by Header.jsx): warm ivory text and logo, with a
+   faint shadow so it holds on busy photos too */
+.nav-label[data-tone='dark'],
+.util[data-tone='dark'],
+.dd-item[data-tone='dark'],
+.site-header .nav-zone.is-open .nav-label[data-tone='dark'] {
+  color: rgba(246, 240, 233, 0.86);
+  text-shadow: 0 0 10px rgba(40, 32, 26, 0.35);
+}
+.site-header.is-hover .nav-label[data-tone='dark'],
+.site-header.is-hover .util[data-tone='dark'] {
+  color: #fffaf5;
+}
+.header-logo[data-tone='dark'] img {
+  /* brown logo → warm ivory */
+  filter: brightness(0) invert(0.95) sepia(0.12);
+}
+/* light areas: a faint light halo keeps the brown text off busy photos */
+.nav-label[data-tone='light'],
+.util[data-tone='light'],
+.dd-item[data-tone='light'] {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
 .mobile-toggle,
 .mobile-panel {
   display: none;
@@ -131,6 +156,11 @@ a.dd-item:hover {
   .site-header.is-scrolled .header-canvas,
   .site-header.is-mobile-open .header-canvas {
     background: rgba(248, 248, 247, 0.92);
+  }
+  /* the bar is light there, so the logo stays brown whatever is underneath */
+  .site-header.is-scrolled .header-logo[data-tone='dark'] img,
+  .site-header.is-mobile-open .header-logo[data-tone='dark'] img {
+    filter: none;
   }
   .header-nav,
   .header-utils {

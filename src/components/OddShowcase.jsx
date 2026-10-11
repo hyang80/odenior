@@ -12,7 +12,8 @@ import '../styles/showcase.css';
  * page background (faint emissive softens its shadows). Only the knot cap's material name differs
  * per export.
  */
-const CAP = { color: [0.68, 0.66, 0.61, 1], roughness: 0.25, metallic: 0, emissive: [0.04, 0.039, 0.036] };
+// ivory knot, 40% less saturated than first tuned ([0.68, 0.66, 0.61]) — it read too yellow
+const CAP = { color: [0.668, 0.656, 0.626, 1], roughness: 0.25, metallic: 0, emissive: [0.039, 0.0385, 0.0373] };
 const bottleMaterials = (cap, capExtra = {}) => ({
   // Frosted glass at 70% over the liquid, always drawn after it (renderOrder) so the liquid shows
   // faintly and the same from every angle
@@ -40,7 +41,7 @@ const FRAMING = { target: '-0.0006m 0.011m 0m', radius: '0.2722m', fov: '36.81de
 // The liquid fills 82% of the bottle and sloshes when the bottle is dragged
 const LIQUID = { material: 'Material.006', fill: 0.82 };
 
-const SERIES = [
+export const SERIES = [
   {
     key: 'nerile',
     variant: 'DF-N',
@@ -75,7 +76,8 @@ const SERIES = [
     color: '#996646',
     icons: ['/assets/046cc.svg', '/assets/d48cb.svg', '/assets/ccbb1.svg'],
     model: '/models/aieule-2.glb',
-    materials: bottleMaterials('tripo_mat_d38952c2.002'),
+    // this export has no neck piece: a smooth neck like the other two fills the knot's rough socket
+    materials: bottleMaterials('tripo_mat_d38952c2.002', { plug: { radius: 0.0105, height: 0.0195 } }),
     liquid: LIQUID,
   },
   {
@@ -94,7 +96,10 @@ const SERIES = [
     icons: ['/assets/9853d.svg', '/assets/ed0a9.svg', '/assets/d2889.svg'],
     model: '/models/amant.glb',
     // the export's swirl texture on the knot is dropped so it gets the plain ivory finish
-    materials: bottleMaterials('tripo_material_24568c86_f249_46d2_bb69_c06d44d2d25c.001', { texture: null }),
+    materials: bottleMaterials('tripo_material_24568c86_f249_46d2_bb69_c06d44d2d25c.001', {
+      texture: null,
+      closeHoles: true, // the knot export is open underneath
+    }),
     liquid: LIQUID,
   },
 ];
