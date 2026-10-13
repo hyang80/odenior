@@ -9,6 +9,58 @@
   zoom: var(--zoom);
   pointer-events: none;
 }
+/* Veil behind the bar while page text runs under it (data-overlap, Header.jsx): a tint in the
+   page's tone that holds over the bar and eases out just below it (many stops, so the fade has no visible edge), so large type or
+   busy photos passing underneath don't collide with the menu. Light and dark veils are two
+   layers that crossfade when data-veil (Header.jsx) changes. Desktop only — the mobile bar has
+   its own solid background. */
+.site-header::before,
+.site-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 112px;
+  z-index: -1; /* under the menu (::after would otherwise paint over it) */
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 600ms var(--ease-out);
+}
+.site-header::before {
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 248, 247, 0.94) 0%,
+    rgba(248, 248, 247, 0.94) 50%,
+    rgba(248, 248, 247, 0.874) 60%,
+    rgba(248, 248, 247, 0.752) 68%,
+    rgba(248, 248, 247, 0.583) 75%,
+    rgba(248, 248, 247, 0.414) 81%,
+    rgba(248, 248, 247, 0.263) 86%,
+    rgba(248, 248, 247, 0.141) 91%,
+    rgba(248, 248, 247, 0.056) 95%,
+    rgba(248, 248, 247, 0.0) 100%
+  );
+}
+.site-header::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(40, 35, 31, 0.62) 0%,
+    rgba(40, 35, 31, 0.62) 50%,
+    rgba(40, 35, 31, 0.577) 60%,
+    rgba(40, 35, 31, 0.496) 68%,
+    rgba(40, 35, 31, 0.384) 75%,
+    rgba(40, 35, 31, 0.273) 81%,
+    rgba(40, 35, 31, 0.174) 86%,
+    rgba(40, 35, 31, 0.093) 91%,
+    rgba(40, 35, 31, 0.037) 95%,
+    rgba(40, 35, 31, 0.0) 100%
+  );
+}
+.site-header.is-scrolled[data-overlap='true']:not([data-veil='dark'])::before,
+.site-header.is-scrolled[data-overlap='true'][data-veil='dark']::after {
+  opacity: 1;
+}
 .header-canvas {
   position: relative;
   width: 1440px;
@@ -146,6 +198,10 @@ a.dd-item:hover {
   .site-header {
     zoom: 1;
     height: 60px;
+  }
+  .site-header::before,
+  .site-header::after {
+    display: none;
   }
   .header-canvas {
     width: 100%;

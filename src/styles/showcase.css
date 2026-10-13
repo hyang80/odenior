@@ -87,6 +87,45 @@
   color: #b5b5b5;
   white-space: nowrap;
 }
+/* "drag to rotate" — centred under the bottle slot (561 + 411/2), same type as .series-hint;
+   fades in when the showcase comes into view, hidden while a bottle is being dragged */
+.series-drag {
+  left: 766px;
+  top: 784px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 25px;
+  font-weight: 500;
+  color: #b5b5b5;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+.series-drag.is-shown {
+  opacity: 1;
+  transition-duration: 700ms;
+}
+.sd-arrow {
+  animation: sd-nudge 2.4s ease-in-out infinite;
+}
+.sd-left {
+  --sd-dir: -1;
+}
+.sd-right {
+  --sd-dir: 1;
+}
+@keyframes sd-nudge {
+  0%, 60%, 100% { transform: translateX(0); }
+  30% { transform: translateX(calc(var(--sd-dir) * 3px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sd-arrow { animation: none; }
+}
 .series-buttons {
   left: 1098px;
   top: 690px;
@@ -138,7 +177,8 @@
     height: 72% !important;
   }
   .series-tag,
-  .series-hint { display: none; }
+  .series-hint,
+  .series-drag { display: none; }
   .series-label { left: 0; top: auto; bottom: 0; }
   .sl-name { font-size: 24px; }
   .sl-sub span:first-child { font-size: 16px; line-height: 26px; }

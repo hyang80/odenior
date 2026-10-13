@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { attachLiquidSlosh } from './liquidSlosh.js';
+import { attachLiquidWater } from './liquidWater.js';
 
 /*
  * Draggable 3D perfume bottle (Blender export → public/models/*.glb) rendered with
@@ -19,8 +20,8 @@ import { attachLiquidSlosh } from './liquidSlosh.js';
  * listed as "Default") — a faint emissive lifts a part's shadows
  * without relighting; renderOrder pins the draw order of see-through parts (three.js otherwise sorts
  * them by distance, so the liquid would jump in front of the glass when viewed from below).
- * `liquid` ({ material, fill, surface }) makes that material slosh when the bottle is dragged
- * (liquidSlosh.js).
+ * `liquid` ({ material, fill, surface, style }) makes that material slosh when the bottle is dragged
+ * (liquidSlosh.js; style: 'water' → the experimental liquidWater.js).
  */
 /*
  * Smooth shading for a faceted part: vertices that share a position (split per face by the export)
@@ -320,7 +321,7 @@ export default function PerfumeModel({
     let detach = () => {};
     const attach = () => {
       detach();
-      detach = attachLiquidSlosh(mv, liquid);
+      detach = (liquid.style === 'water' ? attachLiquidWater : attachLiquidSlosh)(mv, liquid);
     };
     if (mv.loaded) attach();
     mv.addEventListener('load', attach);

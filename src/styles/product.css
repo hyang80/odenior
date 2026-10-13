@@ -3,26 +3,26 @@
   background: #fff;
 }
 
-/* Hero — image 678 (1612×889 @ -94,0) + gradient (1441×495, 64%) */
+/* Hero — image 678 (1469×810 @ -27,3) + gradient (1441×495, 64%); the cards follow at 837 */
 .product-hero {
-  height: calc(889px * var(--zoom));
+  height: calc(837px * var(--zoom));
 }
 .product-hero-img {
   position: absolute;
-  top: 0;
-  left: calc(-94px * var(--zoom));
-  width: max(calc(1612px * var(--zoom)), calc(100% + 172px * var(--zoom)));
-  height: 100%;
+  top: calc(3px * var(--zoom));
+  left: calc(-27px * var(--zoom));
+  width: max(calc(1469px * var(--zoom)), calc(100% + 54px * var(--zoom)));
+  height: calc(810px * var(--zoom));
   overflow: hidden;
 }
 .product-hero-img img {
   position: absolute;
-  left: -0.03%;
-  top: 0;
-  width: 100.06%;
-  height: 101.24%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   max-width: none;
   object-fit: cover;
+  object-position: bottom;
 }
 .product-hero-gradient {
   position: absolute;
@@ -34,7 +34,7 @@
   background-image: linear-gradient(180.05deg, rgb(61, 46, 38) 11.757%, rgba(238, 230, 219, 0) 99.869%);
 }
 .product-hero-canvas {
-  height: 889px;
+  height: 837px;
 }
 /* header tone area (Header.jsx): the darkest part of the gradient */
 .product-hero-tone {
@@ -74,17 +74,19 @@
   white-space: nowrap;
 }
 
-/* ODD SERIES cards (1:55) — band y 889–1927 (the cards frame is 1007 tall, then 31px to the
-   object row); card styles live in home.css */
+/* ODD SERIES cards (1:55) — band y 837–1926 (the cards frame is 1007 tall, then 82px to the
+   object row); cards 406 wide at x 86 / 517 / 948, all at y 265. Card styles live in home.css */
 .product-odd {
-  height: calc(1038px * var(--zoom));
+  height: calc(1089px * var(--zoom));
 }
 .product-odd-canvas {
-  height: 1038px;
+  height: 1089px;
 }
 @media (min-width: 900px) {
-  .product-odd .odd-cards .product-card:nth-child(3) {
-    margin-top: -4px;
+  .product-odd .odd-cards {
+    left: 86px;
+    top: 265px;
+    gap: 25px;
   }
 }
 

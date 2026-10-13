@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import PerfumeModel from './PerfumeModel.jsx';
 import '../styles/showcase.css';
 
@@ -38,8 +38,8 @@ const bottleMaterials = (cap, capExtra = {}) => ({
 // heights. Same slot + same camera → same glass size and height in every variant.
 const SLOT = { left: 561, top: 72, width: 411, height: 697 };
 const FRAMING = { target: '-0.0006m 0.011m 0m', radius: '0.2722m', fov: '36.81deg' }; // AiEULE's auto values
-// The liquid fills 82% of the bottle and sloshes when the bottle is dragged
-const LIQUID = { material: 'Material.006', fill: 0.82 };
+// The liquid fills 82% of the bottle and sloshes like water when the bottle is dragged (liquidWater.js)
+const LIQUID = { material: 'Material.006', fill: 0.82, style: 'water' };
 
 export const SERIES = [
   {
@@ -104,12 +104,78 @@ export const SERIES = [
   },
 ];
 const BUTTON_LEFT = [0, 92, 184]; // bt1 / bt2 / bt3 inside the 244×60 button group
+const NUDGE = 22; // deg — the bottle's one small swing when the showcase first comes into view
+
+// "drag to rotate" hint: fades in when the showcase comes into view and gives the bottle one small
+// swing (the liquid sloshes with it) so it reads as something to grab. Hidden only while dragging.
+function useDragHint(rootRef, viewers, active) {
+  const [shown, setShown] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const activeRef = useRef(active);
+  activeRef.current = active;
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    let timers = [];
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        setShown(true);
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        // swing out, back past the start, and settle where it was (waits for the model to load)
+        const start = (tries = 0) => {
+          const mv = viewers.current[activeRef.current];
+          if (!mv?.loaded) {
+            if (tries < 40) timers.push(setTimeout(() => start(tries + 1), 250));
+            return;
+          }
+          const { theta, phi, radius } = mv.getCameraOrbit();
+          const to = (deg) => {
+            mv.cameraOrbit = `${theta + (deg * Math.PI) / 180}rad ${phi}rad ${radius}m`;
+          };
+          [
+            [0, NUDGE],
+            [550, -NUDGE * 0.6],
+            [1150, 0],
+          ].forEach(([t, deg]) => timers.push(setTimeout(() => to(deg), t)));
+        };
+        timers.push(setTimeout(start, 700));
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(root);
+    return () => {
+      io.disconnect();
+      timers.forEach(clearTimeout);
+    };
+  }, [rootRef, viewers]);
+
+  // the drag can end anywhere on the page, so listen for the release on the window
+  useEffect(() => {
+    if (!dragging) return undefined;
+    const end = () => setDragging(false);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    return () => {
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+    };
+  }, [dragging]);
+
+  return { shown: shown && !dragging, grab: () => setDragging(true) };
+}
 
 export default function OddShowcase({ className = '' }) {
   const [active, setActive] = useState(0);
   const current = SERIES[active];
+  const rootRef = useRef(null);
+  const viewers = useRef([]);
+  const onViewer = useMemo(() => SERIES.map((_, i) => (mv) => (viewers.current[i] = mv)), []);
+  const hint = useDragHint(rootRef, viewers, active);
   return (
-    <div className={`odd-showcase ${className}`}>
+    <div className={`odd-showcase ${className}`} ref={rootRef}>
     <div className="abs series-title">
       <p>ODD</p>
       <p>SERIES</p>
@@ -130,6 +196,7 @@ export default function OddShowcase({ className = '' }) {
       >
         <div
           className="abs series-img"
+          onPointerDown={hint.grab}
           style={{ left: s.imgBox.left, top: s.imgBox.top, width: s.imgBox.width, height: s.imgBox.height }}
         >
           {s.model ? (
@@ -140,6 +207,7 @@ export default function OddShowcase({ className = '' }) {
               materials={s.materials}
               liquid={s.liquid}
               framing={FRAMING}
+              onViewer={onViewer[i]}
               className="fill series-model"
             />
           ) : (
@@ -168,6 +236,15 @@ export default function OddShowcase({ className = '' }) {
       </div>
     ))}
 
+    <p className={`abs series-drag${hint.shown ? ' is-shown' : ''}`} aria-hidden="true">
+      <svg className="sd-arrow sd-left" width="8" height="12" viewBox="0 0 8 12" fill="none">
+        <path d="M6.5 1 1.5 6l5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      drag to rotate
+      <svg className="sd-arrow sd-right" width="8" height="12" viewBox="0 0 8 12" fill="none">
+        <path d="M1.5 1 6.5 6l-5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </p>
     <p className="abs series-hint">click the odd object</p>
     <div className="abs series-buttons" role="tablist" aria-label="ODD 시리즈 선택">
       {SERIES.map((s, i) => (

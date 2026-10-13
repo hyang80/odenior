@@ -338,12 +338,6 @@
   align-items: flex-start;
   gap: 26px;
 }
-/* Figma: Frame 96 (AMANT) sits at y 227, 4px above the other two */
-@media (min-width: 900px) {
-  .odd-cards .product-card:nth-child(3) {
-    margin-top: -4px;
-  }
-}
 
 /* Product card — Frame 94/95/96 (406×710.86); a link on home (→ that bottle on /product) */
 .product-card {
@@ -399,47 +393,27 @@
 .product-card.is-active .pc-hover {
   opacity: 1;
 }
-.pc-rect {
+/* Variant2 art (Figma 150:3412 / 3462 / 3518): photo over the 406×544 panel, 20% dim, line mark */
+.pc-photo {
   position: absolute;
-  top: 0.04%;
-  bottom: 23.57%;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 76.53%; /* 544 / 710.86 */
   overflow: hidden;
 }
-.pc-rect-nerile { left: 0; right: -0.25%; opacity: 0.59; }
-.pc-rect-aieule { left: -0.25%; right: 0; opacity: 0.64; }
-.pc-rect-aieule .pc-rect-grain { opacity: 0.54; }
-.pc-rect-amant { left: 0; right: 0; }
-.pc-rect-amant img { opacity: 0.57; }
-.pc-symbol-nerile {
-  left: 33%;
-  right: 33.74%;
-  top: 28.32%;
-  bottom: 52.47%;
-  width: auto;
-  height: auto;
+.pc-photo img {
+  object-position: bottom;
 }
-.pc-symbol-aieule {
-  left: 33%;
-  right: 33.25%;
-  top: 29.02%;
-  bottom: 52.72%;
+.pc-photo-flip img {
+  transform: scaleX(-1); /* NeRilE's photo is mirrored in Figma */
 }
-.pc-symbol-aieule img {
-  position: absolute;
-  top: -1.16%;
-  bottom: -1.16%;
-  left: -1.1%;
-  right: -1.09%;
-  width: auto;
-  height: auto;
+.pc-photo-dim {
+  background: rgba(0, 0, 0, 0.2);
 }
-.pc-symbol-amant {
-  left: calc(50% + 0.5px);
-  top: calc(50% - 84.65px);
-  width: 137px;
-  height: 135px;
-  transform: translate(-50%, -50%);
-}
+.pc-mark { left: 35.68%; top: 30.09%; width: 28.88%; height: 16.47%; } /* NeRilE */
+.product-card-aieule .pc-mark { left: 34.73%; top: 29.74%; width: 30.97%; height: 16.94%; }
+.product-card-amant .pc-mark { left: 34.72%; top: 29.54%; width: 30.34%; height: 17.06%; }
 .pc-name,
 .pc-sub,
 .pc-desc {
@@ -453,7 +427,7 @@
 .pc-name { top: 79.6%; font-size: 24px; line-height: normal; }
 .pc-sub { top: 83.96%; font-size: 16px; line-height: normal; }
 .pc-desc { top: 91.14%; font-size: 18px; line-height: normal; }
-.product-card.is-active .pc-name { color: #4f443b; }
+.product-card.is-active .pc-name { color: var(--name-hover, #4f443b); }
 .product-card.is-active .pc-sub,
 .product-card.is-active .pc-desc { color: #a6a6a6; }
 

@@ -43,7 +43,9 @@ const MENUS = [
  * "dark" (sub-areas like one half of a split row can mark themselves too). Each header item —
  * menu labels, logo, utilities, dropdown items — looks up the topmost marked area under its own
  * centre and takes that tone (data-tone), so it stays legible on photos, white bands and the dark
- * curtain alike; colours ease over 300ms. Unmarked areas count as light.
+ * curtain alike; colours ease over 300ms. Unmarked areas count as light. While page text runs
+ * under the bar (data-overlap), a soft veil in the same tone (data-veil) fades in behind it so the
+ * text never collides with the menu; with nothing to collide with, there is no veil.
  */
 const PROBES = '.nav-label, .util, .header-logo, .dd-item';
 
@@ -58,6 +60,55 @@ function toneAt(x, y) {
   return tone;
 }
 
+// Is any page text under the bar? Checks the actual glyph boxes of the page's text (not sample
+// points, which slip between short words and miss copy with pointer-events: none). Text counts
+// when it is visible (opacity / visibility) and not covered by a marked section painted over it
+// (e.g. copy under the Our Story curtain).
+let textCache = { at: 0, nodes: [] };
+function pageTextNodes() {
+  const now = performance.now();
+  if (now - textCache.at > 1000) {
+    const nodes = [];
+    const main = document.querySelector('main');
+    if (main) {
+      const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) if (walker.currentNode.textContent.trim()) nodes.push(walker.currentNode);
+    }
+    textCache = { at: now, nodes };
+  }
+  return textCache.nodes;
+}
+const visible = (el) =>
+  el.checkVisibility
+    ? el.checkVisibility({ opacityProperty: true, visibilityProperty: true })
+    : getComputedStyle(el).visibility !== 'hidden';
+const covered = (el, x, y) =>
+  [...document.querySelectorAll('[data-header-tone]')].some((area) => {
+    if (area.contains(el) || !(area.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)) return false;
+    const r = area.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  });
+function textUnder(rect) {
+  const top = rect.top + 6;
+  const bottom = rect.bottom - 6;
+  const range = document.createRange();
+  for (const node of pageTextNodes()) {
+    const el = node.parentElement;
+    if (!el?.isConnected) continue;
+    const box = el.getBoundingClientRect();
+    if (box.bottom < top || box.top > bottom || box.right < 0 || box.left > window.innerWidth) continue;
+    range.selectNodeContents(node);
+    for (const r of range.getClientRects()) {
+      if (r.bottom < top || r.top > bottom || r.right < 0 || r.left > window.innerWidth || !r.width) continue;
+      if (!visible(el)) break;
+      const x = Math.min(window.innerWidth - 1, Math.max(1, (r.left + r.right) / 2));
+      const y = Math.min(bottom, Math.max(top, (r.top + r.bottom) / 2));
+      if (!covered(el, x, y)) return true;
+    }
+  }
+  return false;
+}
+
 function useHeaderTone(rootRef, pathname) {
   useEffect(() => {
     const root = rootRef.current;
@@ -65,6 +116,13 @@ function useHeaderTone(rootRef, pathname) {
     let raf = 0;
     const update = () => {
       raf = 0;
+      // the veil behind the whole bar follows the area under its centre
+      const r0 = root.getBoundingClientRect();
+      const veil = toneAt(window.innerWidth / 2, r0.top + r0.height / 2);
+      if (root.dataset.veil !== veil) root.dataset.veil = veil;
+      // …and only shows while page text actually runs under the bar
+      const overlap = textUnder(r0) ? 'true' : 'false';
+      if (root.dataset.overlap !== overlap) root.dataset.overlap = overlap;
       root.querySelectorAll(PROBES).forEach((el) => {
         const r = el.getBoundingClientRect();
         if (!r.width) return;

@@ -16,7 +16,12 @@ export default function ProductCard({ data, href, onOpen }) {
       }
     : {};
   return (
-    <Tag className={`product-card${active ? ' is-active' : ''}`} {...bind} {...link}>
+    <Tag
+      className={`product-card product-card-${data.key}${active ? ' is-active' : ''}`}
+      style={data.nameHover ? { '--name-hover': data.nameHover } : undefined}
+      {...bind}
+      {...link}
+    >
       <div className="pc-bg" />
       <div
         className="pc-img"

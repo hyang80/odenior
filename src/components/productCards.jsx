@@ -1,7 +1,10 @@
-// ODD SERIES product cards (Figma Frame 94 / 95 / 96) with their hover (Variant2) art
+// ODD SERIES product cards (Figma Frame 127 / 128 / 129) — hover (Variant2): a lifestyle photo
+// under a 20% dim with the knot's line mark, and the name in the bottle's colour (nameHover).
+// The AiEULE / AMANT photos are tone-matched to NeRilE's (Lab mean/contrast transfer).
 export const CARDS = [
   {
     key: 'nerile',
+    nameHover: '#ac9481',
     name: 'NeRilE',
     sub: 'The First Embrace',
     img: '/assets/f10b9.png',
@@ -10,15 +13,17 @@ export const CARDS = [
     logoHover: '/assets/57235.svg',
     hover: (
       <>
-        <div className="pc-rect pc-rect-nerile">
-          <img src="/assets/a1e42.png" alt="" className="fill" />
+        <div className="pc-photo pc-photo-flip">
+          <img src="/assets/card-nerile.jpg" alt="" className="fill cover" />
+          <div className="fill pc-photo-dim" />
         </div>
-        <img src="/assets/38784.svg" alt="" className="abs pc-symbol pc-symbol-nerile" width="135" height="136.607" />
+        <img src="/assets/93add.svg" alt="" className="abs pc-mark" width="117.24" height="117.083" />
       </>
     ),
   },
   {
     key: 'aieule',
+    nameHover: '#ab805e',
     name: 'AiEULE',
     sub: 'The Last Heart',
     img: '/assets/045b7.png',
@@ -27,18 +32,17 @@ export const CARDS = [
     logoHover: '/assets/da7b3.svg',
     hover: (
       <>
-        <div className="pc-rect pc-rect-aieule">
-          <img src="/assets/a1e42.png" alt="" className="fill" />
-          <img src="/assets/c5e2d.png" alt="" className="fill pc-rect-grain" />
+        <div className="pc-photo">
+          <img src="/assets/card-aieule.jpg" alt="" className="fill cover" />
+          <div className="fill pc-photo-dim" />
         </div>
-        <div className="abs pc-symbol-aieule">
-          <img src="/assets/f7e72.svg" alt="" width="140" height="132.797" />
-        </div>
+        <img src="/assets/334a9.svg" alt="" className="abs pc-mark" width="125.734" height="120.424" />
       </>
     ),
   },
   {
     key: 'amant',
+    nameHover: '#9c6060',
     name: 'AMANT',
     sub: 'The Other Half',
     img: '/assets/97f19.png',
@@ -47,10 +51,11 @@ export const CARDS = [
     logoHover: '/assets/da7b3.svg',
     hover: (
       <>
-        <div className="pc-rect pc-rect-amant">
-          <img src="/assets/7caa3.png" alt="" className="fill" />
+        <div className="pc-photo">
+          <img src="/assets/card-amant.jpg" alt="" className="fill cover" />
+          <div className="fill pc-photo-dim" />
         </div>
-        <img src="/assets/951da.svg" alt="" className="abs pc-symbol-amant" width="137" height="135" />
+        <img src="/assets/9f7a9.svg" alt="" className="abs pc-mark" width="123.183" height="121.297" />
       </>
     ),
   },
