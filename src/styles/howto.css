@@ -3,12 +3,13 @@
   background: #fff;
 }
 .howto-main {
-  height: calc(4179px * var(--zoom));
+  /* Figma 4179 + STEP 02's spray hold (HOLD in HowToUse.jsx) */
+  height: calc(5579px * var(--zoom));
   /* clip, not hidden: hidden would make this the scroll container and break the sticky stage */
   overflow: clip;
 }
 .howto-canvas {
-  height: 4179px;
+  height: 5579px;
 }
 
 /* Frame 84 (1440×448 @ 0,133) */
@@ -62,7 +63,7 @@
 }
 .howto-word-1 { top: 869px; }
 .howto-word-2 { top: 1973px; }
-.howto-word-3 { top: 3196px; left: 719.5px; }
+.howto-word-3 { top: 4596px; left: 719.5px; } /* 3196 + HOLD */
 
 /* Step copy (1:379–1:381) — rides on the pinned stage with its bottle, vertically centred;
    HowToUse.jsx fades and drifts it with the hand-over. `left` comes from the step data. */
@@ -118,8 +119,8 @@
   left: 0;
   right: 0;
   top: calc(1202px * var(--zoom) - 50vh);
-  /* first bottle's centre → last one's + its 300px exit (EXIT) */
-  height: calc(2518px * var(--zoom) + 100vh);
+  /* first bottle's centre → last one's (moved down by HOLD) + its 300px exit (EXIT) */
+  height: calc(3918px * var(--zoom) + 100vh);
   z-index: 1;
   pointer-events: none;
 }
@@ -128,6 +129,14 @@
   top: 0;
   height: 100vh;
   overflow: hidden;
+}
+/* STEP 02's spray mist, over the bottles and under the copy */
+.howto-mist {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 .howto-bottle {
   position: absolute;
@@ -196,6 +205,7 @@
   }
   .howto-word,
   .howto-anchor,
+  .howto-mist,
   .howto-bottle {
     display: none;
   }

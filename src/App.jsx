@@ -13,6 +13,7 @@ import Product from './pages/Product.jsx';
 import HowToUse from './pages/HowToUse.jsx';
 import ObjectMotion from './pages/ObjectMotion.jsx';
 import LiquidLab from './pages/LiquidLab.jsx';
+import SprayLab from './pages/SprayLab.jsx';
 import Bag from './pages/Bag.jsx';
 import { useCanvasZoom } from './hooks/useCanvasZoom.js';
 
@@ -50,6 +51,7 @@ export default function App() {
       '/bag': 'Bag — odenior',
       '/object-motion': 'Object motion — odenior',
       '/liquid-lab': 'Liquid lab — odenior',
+      '/spray-lab': 'Spray lab — odenior',
     };
     document.title = titles[pathname] ?? 'odenior';
   }, [pathname]);
@@ -67,6 +69,7 @@ export default function App() {
           <Route path="/bag" element={<Bag />} />
           <Route path="/object-motion" element={<ObjectMotion />} />
           <Route path="/liquid-lab" element={<LiquidLab />} />
+          <Route path="/spray-lab" element={<SprayLab />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </PageTransition>

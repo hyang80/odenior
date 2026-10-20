@@ -3,6 +3,7 @@ import { useVariant } from '../hooks/useVariant.js';
 import { useInViewOnce } from '../hooks/useReveal.js';
 import PerfumeModel from '../components/PerfumeModel.jsx';
 import { FRAMING, SERIES } from '../components/OddShowcase.jsx';
+import { SPRAY_MODELS, createSprayRig, sprayPhases } from '../components/sprayRig.js';
 import '../styles/howto.css';
 
 /*
@@ -11,9 +12,15 @@ import '../styles/howto.css';
  * and turns on its own axis with the scroll; between steps it hands over to the next bottle —
  * the old one drifts up and fades out, then the new one rises in from below — while the lean
  * swings through upright to the next step's side. Each step's copy rides on the stage with its
- * bottle and hands over the same way. Each bottle faces
- * front when it sits where Figma places it.
+ * bottle and hands over the same way. Each bottle faces front when it sits where Figma places it.
+ *
+ * STEP 02 holds the stage for HOLD px (added to the Figma layout; everything below moves down by
+ * it) and plays the spray on AiEULE while you scroll through it (sprayRig.js, as on /spray-lab):
+ * the bottle straightens, the knot cap lifts off, the camera closes in on the chrome pump turned
+ * side-on, it is pressed and a mist bursts out to the left (away from the copy), then the camera
+ * eases back out before the hand-over to STEP 03.
  */
+const HOLD = 1400;
 
 // per step: the bottle (SERIES key), its centre on the 1440 canvas (Figma image 511/514/515,
 // nudged away from the copy so the leaning bottle clears it), its lean (CSS deg, + = clockwise)
@@ -35,6 +42,9 @@ const STEPS = [
     x: 690,
     y: 2252,
     tilt: 20,
+    hold: HOLD,
+    model: '/models/aieule-spray.glb', // AiEULE with AMANT's spray pump under the knot
+    spray: SPRAY_MODELS.aieule,
     copy: {
       x: 986,
       label: 'STEP 02',
@@ -44,7 +54,7 @@ const STEPS = [
   {
     key: 'amant',
     x: 730,
-    y: 3420,
+    y: 3420 + HOLD,
     tilt: -20,
     copy: {
       x: 86,
@@ -62,6 +72,9 @@ const COPY_DRIFT = 70; // …and the copy, a little less (it trails the bottle s
 const PHI = 80; // camera elevation (deg from the top), as on the home showcase
 
 const smooth = (t) => t * t * (3 - 2 * t);
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
+const startOf = (s) => s.y;
+const endOf = (s) => s.y + (s.hold ?? 0);
 const lerp = (a, b, t) => a + (b - a) * t;
 
 /** Scene-space direction that reads as "up" on screen, for a canvas leaning `tilt` deg. */
@@ -72,7 +85,7 @@ function upFor(theta, phi, tilt) {
   return [0, 1, 2].map((i) => -Math.sin(a) * right[i] + Math.cos(a) * camUp[i]);
 }
 
-function StageBottle({ series, state, index }) {
+function StageBottle({ series, state, index, model }) {
   const onViewer = useCallback(
     (mv) => {
       state.current[index].mv = mv;
@@ -93,7 +106,7 @@ function StageBottle({ series, state, index }) {
   );
   return (
     <PerfumeModel
-      src={series.model}
+      src={model ?? series.model}
       poster={series.img}
       alt={`${series.name} 3D`}
       materials={series.materials}
@@ -113,6 +126,7 @@ export default function HowToUse() {
   const canvasRef = useRef(null);
   const boxRefs = useRef([]);
   const copyRefs = useRef([]);
+  const mistRef = useRef(null);
   const cautionRef = useRef(null);
   const cautionSeen = useInViewOnce(cautionRef, { threshold: 0.35, rootMargin: '0px' });
   const state = useRef(STEPS.map((s) => ({ mv: null, theta: 0, tilt: s.tilt })));
@@ -121,8 +135,14 @@ export default function HowToUse() {
   useEffect(() => {
     let raf = 0;
     let lastY = null;
-    const tick = () => {
+    let prev = performance.now();
+    const sprays = STEPS.map((s) => s.spray && createSprayRig({ names: s.spray, framing: FRAMING, side: -1, phi: PHI }));
+    const tick = (now) => {
       raf = requestAnimationFrame(tick);
+      const dt = Math.min(0.05, (now - prev) / 1000);
+      prev = now;
+      // the mist keeps moving after the scroll stops
+      sprays.forEach((r) => r && mistRef.current && r.draw(mistRef.current, dt));
       const canvas = canvasRef.current;
       if (!canvas) return;
       const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom')) || 1;
@@ -130,11 +150,21 @@ export default function HowToUse() {
       const y = (window.innerHeight / 2 - canvas.getBoundingClientRect().top) / z;
       if (y === lastY) return;
       lastY = y;
+      // spray steps: progress through their hold, and the sequence's phases
+      const seq = STEPS.map((s) => {
+        if (!s.spray) return null;
+        const p = clamp01((y - startOf(s)) / s.hold);
+        const ph = sprayPhases(p);
+        ph.turn *= 1 - smooth(clamp01((p - 0.9) / 0.1)); // ease back out before the hand-over
+        return ph;
+      });
+      // a spray step stands upright while it plays
+      const tiltOf = (i) => STEPS[i].tilt * (seq[i] ? 1 - seq[i].open : 1);
       // which hand-over we're in: k = step before, t = 0…1 towards step k + 1
       let k = 0;
       let t = 0;
       for (let i = 0; i < STEPS.length - 1; i++) {
-        const start = (STEPS[i].y + STEPS[i + 1].y) / 2 - BAND / 2;
+        const start = (endOf(STEPS[i]) + startOf(STEPS[i + 1])) / 2 - BAND / 2;
         if (y >= start) {
           k = i;
           t = smooth(Math.min(1, (y - start) / BAND));
@@ -143,10 +173,10 @@ export default function HowToUse() {
       const a = STEPS[k];
       const b = STEPS[k + 1] ?? a;
       const x = lerp(a.x, b.x, t);
-      const tilt = lerp(a.tilt, b.tilt, t);
+      const tilt = lerp(tiltOf(k), tiltOf(Math.min(k + 1, STEPS.length - 1)), t);
       const last = STEPS.length - 1;
       // after the last step, the last bottle and its copy leave the same way
-      const exit = Math.min(1, Math.max(0, (y - STEPS[last].y) / EXIT));
+      const exit = Math.min(1, Math.max(0, (y - endOf(STEPS[last])) / EXIT));
       // out over the first 60% of the hand-over, in over the last 60%: they barely overlap
       const out = Math.min(1, t / 0.6);
       const inn = Math.max(0, (t - 0.4) / 0.6);
@@ -177,9 +207,15 @@ export default function HowToUse() {
         copy.style.visibility = vis;
         copy.style.transform = `translateY(calc(-50% + ${(move * COPY_DRIFT).toFixed(2)}px))`;
         const st = state.current[i];
-        st.theta = (y - s.y) * SPIN;
+        // turning with the scroll before and after the step (a spray step holds still meanwhile)
+        const spin = (y < startOf(s) ? y - startOf(s) : y > endOf(s) ? y - endOf(s) : 0) * SPIN;
         st.tilt = tilt;
-        if (st.mv && show > 0.001) {
+        if (!st.mv || show <= 0.001) return;
+        if (sprays[i]) {
+          sprays[i].update(st.mv, seq[i], spin);
+          st.theta = sprays[i].theta;
+        } else {
+          st.theta = spin;
           st.mv.cameraOrbit = `${st.theta.toFixed(2)}deg ${PHI}deg ${FRAMING.radius}`;
           st.mv.jumpCameraToGoal();
         }
@@ -228,9 +264,10 @@ export default function HowToUse() {
           <div className="howto-stage">
             {STEPS.map((s, i) => (
               <div key={s.key} className="howto-bottle" ref={(el) => (boxRefs.current[i] = el)}>
-                <StageBottle series={series[i]} state={state} index={i} />
+                <StageBottle series={series[i]} state={state} index={i} model={s.model} />
               </div>
             ))}
+            <canvas className="howto-mist" ref={mistRef} aria-hidden="true" />
             <div className="howto-stage-canvas">
               {STEPS.map((s, i) => (
                 <div

@@ -14,15 +14,83 @@ import { attachLiquidWater } from './liquidWater.js';
  * sides), so front and back read the same tone and shading only falls on the sides; `materials` can
  * override colours per glTF material: { [name]: { color: [r, g, b, a] (linear), roughness,
  * metallic, emissive: [r, g, b], alphaMode, texture: null, renderOrder, clearcoat, clearcoatRoughness,
- * smooth: angle°, closeHoles: true, plug: { radius, height } } } (`smooth` re-shades a faceted part smoothly, see
- * smoothNormals; `closeHoles` seals an open mesh, see closeHoles; `plug` adds a neck, see addNeckPlug)
+ * smooth: angle°, closeHoles: true, plug: { radius, height }, grain: { size, strength } } } (`smooth`
+ * re-shades a faceted part smoothly, see smoothNormals; `closeHoles` seals an open mesh, see
+ * closeHoles; `plug` adds a neck, see addNeckPlug; `grain` gives the surface a fine pebbled
+ * texture, see addGrain)
  * (`texture: null` drops an exported base-colour texture; parts exported without a material are
  * listed as "Default") — a faint emissive lifts a part's shadows
  * without relighting; renderOrder pins the draw order of see-through parts (three.js otherwise sorts
  * them by distance, so the liquid would jump in front of the glass when viewed from below).
+ * `shadow` (0…1) adds a soft contact shadow on the ground under the bottle.
  * `liquid` ({ material, fill, surface, style }) makes that material slosh when the bottle is dragged
  * (liquidSlosh.js; style: 'water' → the experimental liquidWater.js).
  */
+/*
+ * Pebbled surface (like textured frosted glass), drawn in the shader — no texture file: the
+ * shading normal is tilted by the slope of a field of small rounded bumps (3D cellular noise in
+ * the part's own space, so the texture sits on the object and turns with it). `size` is the
+ * bump spacing in model units (m), `strength` how far the normal leans (0…1). The glossy clear
+ * coat keeps the smooth geometric normal, so the sheen stays clean over the textured body —
+ * as on real textured glass.
+ */
+function addGrain(material, { size = 0.0009, strength = 0.3 }) {
+  if (material.userData.grain) return;
+  material.userData.grain = true;
+  const prev = material.onBeforeCompile;
+  material.onBeforeCompile = (shader, renderer) => {
+    prev?.(shader, renderer);
+    shader.uniforms.uGrainScale = { value: 1 / size };
+    shader.uniforms.uGrainStrength = { value: strength };
+    shader.vertexShader = `varying vec3 vGrainPos; varying vec3 vGrainX; varying vec3 vGrainY; varying vec3 vGrainZ;
+uniform float uGrainScale;
+${shader.vertexShader.replace(
+  '#include <begin_vertex>',
+  `#include <begin_vertex>
+  vGrainPos = position * uGrainScale;
+  vGrainX = normalMatrix * vec3(1.0, 0.0, 0.0);
+  vGrainY = normalMatrix * vec3(0.0, 1.0, 0.0);
+  vGrainZ = normalMatrix * vec3(0.0, 0.0, 1.0);`,
+)}`;
+    shader.fragmentShader = `varying vec3 vGrainPos; varying vec3 vGrainX; varying vec3 vGrainY; varying vec3 vGrainZ;
+uniform float uGrainStrength;
+vec3 grainHash(vec3 p) {
+  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
+  return fract(sin(p) * 43758.5453);
+}
+// rounded bumps: 1 - (distance to the nearest cell point)², irregular cells
+float grainBump(vec3 p) {
+  vec3 i = floor(p);
+  vec3 f = fract(p);
+  float d = 8.0;
+  for (int x = -1; x <= 1; x++)
+    for (int y = -1; y <= 1; y++)
+      for (int z = -1; z <= 1; z++) {
+        vec3 o = vec3(float(x), float(y), float(z));
+        vec3 r = o + grainHash(i + o) * 0.85 - f;
+        d = min(d, dot(r, r));
+      }
+  return 1.0 - d;
+}
+${shader.fragmentShader.replace(
+  '#include <normal_fragment_maps>',
+  `#include <normal_fragment_maps>
+  {
+    float gE = 0.08;
+    float g0 = grainBump(vGrainPos);
+    vec3 gG = vec3(grainBump(vGrainPos + vec3(gE, 0.0, 0.0)) - g0,
+                   grainBump(vGrainPos + vec3(0.0, gE, 0.0)) - g0,
+                   grainBump(vGrainPos + vec3(0.0, 0.0, gE)) - g0) / gE;
+    vec3 gV = gG.x * vGrainX + gG.y * vGrainY + gG.z * vGrainZ;
+    normal = normalize(normal - uGrainStrength * 0.25 * (gV - dot(gV, normal) * normal));
+  }`,
+)}`;
+  };
+  const key = material.customProgramCacheKey?.bind(material);
+  material.customProgramCacheKey = () => `${key ? key() : ''}|grain:${size}:${strength}`;
+  material.needsUpdate = true;
+}
+
 /*
  * Smooth shading for a faceted part: vertices that share a position (split per face by the export)
  * get the average of their normals, but only across faces within `angle`° of each other, so
@@ -261,6 +329,7 @@ export default function PerfumeModel({
   framing,
   only,
   still = false,
+  shadow = 0,
   onViewer,
 }) {
   const viewerRef = useRef(null);
@@ -302,6 +371,7 @@ export default function PerfumeModel({
         if (o.smooth) smoothNormals(obj.geometry, o.smooth);
         if (o.closeHoles) closeHoles(obj.geometry);
         if (o.plug) addNeckPlug(obj, o.plug);
+        if (o.grain) addGrain(obj.material, o.grain);
         // glossy top coat over a matte base (three.js MeshPhysicalMaterial), colour untouched
         if (o.clearcoat != null && 'clearcoat' in obj.material) {
           obj.material.clearcoat = o.clearcoat;
@@ -418,7 +488,8 @@ export default function PerfumeModel({
       environment-image="/models/studio-env-v2.hdr"
       tone-mapping="neutral"
       exposure="1.3"
-      shadow-intensity="0"
+      shadow-intensity={shadow}
+      shadow-softness="1"
     />
   );
 }

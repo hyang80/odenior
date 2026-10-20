@@ -1,0 +1,52 @@
+/* ===== Spray lab (SprayLab.jsx) — pinned AMANT bottle: open, press, spray ===== */
+.page-spray {
+  background: #fff;
+}
+.spray-section {
+  position: relative;
+  height: 500vh;
+}
+.spray-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: #fff;
+}
+.spray-bottle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 72vh;
+  aspect-ratio: 411 / 697;
+  transform: translate(-60%, -46%);
+}
+.spray-mist {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.spray-steps {
+  position: absolute;
+  left: 86px;
+  bottom: 64px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: 28px;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  color: #d3c3b4;
+}
+.spray-steps li {
+  transition: color 400ms ease;
+}
+.spray-stage[data-phase='open'] .ss-open,
+.spray-stage[data-phase='press'] .ss-press,
+.spray-stage[data-phase='spray'] .ss-spray {
+  color: #8c7565;
+}

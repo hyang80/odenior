@@ -25,6 +25,8 @@ const bottleMaterials = (cap, capExtra = {}) => ({
     renderOrder: 1,
     clearcoat: 0.7,
     clearcoatRoughness: 0.15,
+    // a faint pebbled texture under the clear coat, like textured frosted glass (softer than real)
+    grain: { size: 0.00045, strength: 0.23 },
   }, // bottle
   'Material.006': { renderOrder: 0 }, // liquid
   [cap]: { ...CAP, ...capExtra }, // knot cap
@@ -207,6 +209,7 @@ export default function OddShowcase({ className = '' }) {
               materials={s.materials}
               liquid={s.liquid}
               framing={FRAMING}
+              shadow={0.45}
               onViewer={onViewer[i]}
               className="fill series-model"
             />
