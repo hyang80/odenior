@@ -24,6 +24,7 @@ const BURST = 0.6; // s the spray lasts per press
 // while turning, the camera closes in on the pump (radius in m, target y in m)
 const NEAR = { radius: 0.16, targetY: 0.024 };
 const TURN = 58; // deg the bottle turns to put the orifice side-on
+const BANDS = 8; // opacity steps the droplets are drawn in
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 const ease = (t) => t * t * (3 - 2 * t);
@@ -91,6 +92,8 @@ export function createSprayRig({ names, framing, side = 1, phi = PHI }) {
   const parts = [];
   let glow = 0;
   let glowAt = null;
+  let dirty = false;
+  const bands = Array.from({ length: BANDS }, () => []);
 
   const setup = (mv) => {
     if (!mv?.loaded) return null;
@@ -154,6 +157,12 @@ export function createSprayRig({ names, framing, side = 1, phi = PHI }) {
         canvas.height = Math.round(rect.height * dpr);
       }
       const ctx = canvas.getContext('2d');
+      if (!parts.length && burst <= 0 && glow <= 0) {
+        if (dirty) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        dirty = false;
+        return;
+      }
+      dirty = true;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, rect.width, rect.height);
       if (rig && burst > 0) {
@@ -196,23 +205,33 @@ export function createSprayRig({ names, framing, side = 1, phi = PHI }) {
         ctx.fillStyle = g;
         ctx.fillRect(cx - 240 * scale, cy - 240 * scale, 480 * scale, 480 * scale);
       }
-      for (let i = parts.length - 1; i >= 0; i--) {
+      // droplets, batched into a few opacity bands (one path and fill per band, not per droplet)
+      const drag = Math.exp(-6 * dt);
+      for (const band of bands) band.length = 0;
+      let live = 0;
+      for (let i = 0; i < parts.length; i++) {
         const q = parts[i];
         q.life += dt;
-        if (q.life > q.max) {
-          parts.splice(i, 1);
-          continue;
-        }
-        const drag = Math.exp(-6 * dt);
+        if (q.life > q.max) continue;
+        parts[live++] = q;
         q.vx *= drag;
         q.vy = q.vy * drag + 12 * dt;
         q.x += q.vx * dt;
         q.y += q.vy * dt;
         const t = q.life / q.max;
         const alpha = q.a * Math.min(1, q.life * 30) * (1 - t) ** 1.3;
-        ctx.fillStyle = `rgba(228, 216, 182, ${alpha.toFixed(3)})`;
+        const b = Math.min(BANDS - 1, Math.floor(alpha * BANDS));
+        if (b > 0) bands[b].push(q);
+      }
+      parts.length = live;
+      for (let b = 1; b < BANDS; b++) {
+        if (!bands[b].length) continue;
+        ctx.fillStyle = `rgba(228, 216, 182, ${((b + 0.5) / BANDS).toFixed(3)})`;
         ctx.beginPath();
-        ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2);
+        for (const q of bands[b]) {
+          ctx.moveTo(q.x + q.r, q.y);
+          ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2);
+        }
         ctx.fill();
       }
     },

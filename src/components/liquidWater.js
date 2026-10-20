@@ -284,7 +284,11 @@ ${shader.fragmentShader
       const l = Math.hypot(v[0], v[1], v[2]) || 1;
       uniforms.uLiqUp.value = [v[0] / l, v[1] / l, v[2] / l];
     }
-    scene.queueRender?.();
+    // keep redrawing only while the bottle can be seen (stacked variants / stage bottles are
+    // hidden with visibility or opacity 0 — drawing them anyway costs a full frame each)
+    if (!mv.checkVisibility || mv.checkVisibility({ opacityProperty: true, visibilityProperty: true })) {
+      scene.queueRender?.();
+    }
     raf = requestAnimationFrame(tick);
   };
   raf = requestAnimationFrame(tick);

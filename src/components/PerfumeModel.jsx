@@ -28,8 +28,9 @@ import { attachLiquidWater } from './liquidWater.js';
  */
 /*
  * Pebbled surface (like textured frosted glass), drawn in the shader — no texture file: the
- * shading normal is tilted by the slope of a field of small rounded bumps (3D cellular noise in
- * the part's own space, so the texture sits on the object and turns with it). `size` is the
+ * shading normal is tilted by the slope of a field of small rounded bumps (3D value noise with an
+ * analytic slope — one cheap pass — in the part's own space, so the texture sits on the object
+ * and turns with it). `size` is the
  * bump spacing in model units (m), `strength` how far the normal leans (0…1). The glossy clear
  * coat keeps the smooth geometric normal, so the sheen stays clean over the textured body —
  * as on real textured glass.
@@ -54,40 +55,49 @@ ${shader.vertexShader.replace(
 )}`;
     shader.fragmentShader = `varying vec3 vGrainPos; varying vec3 vGrainX; varying vec3 vGrainY; varying vec3 vGrainZ;
 uniform float uGrainStrength;
-vec3 grainHash(vec3 p) {
-  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
-  return fract(sin(p) * 43758.5453);
+float grainHash(vec3 p) {
+  p = fract(p * 0.3183099 + 0.1);
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
 }
-// rounded bumps: 1 - (distance to the nearest cell point)², irregular cells
-float grainBump(vec3 p) {
-  vec3 i = floor(p);
-  vec3 f = fract(p);
-  float d = 8.0;
-  for (int x = -1; x <= 1; x++)
-    for (int y = -1; y <= 1; y++)
-      for (int z = -1; z <= 1; z++) {
-        vec3 o = vec3(float(x), float(y), float(z));
-        vec3 r = o + grainHash(i + o) * 0.85 - f;
-        d = min(d, dot(r, r));
-      }
-  return 1.0 - d;
+// slope of smooth value noise (analytic derivative, quintic fade): soft rounded bumps, one pass,
+// 8 cheap hashes — no sin()
+vec3 grainSlope(vec3 x) {
+  vec3 i = floor(x);
+  vec3 w = fract(x);
+  vec3 u = w * w * w * (w * (w * 6.0 - 15.0) + 10.0);
+  vec3 du = 30.0 * w * w * (w * (w - 2.0) + 1.0);
+  float a = grainHash(i);
+  float b = grainHash(i + vec3(1.0, 0.0, 0.0));
+  float c = grainHash(i + vec3(0.0, 1.0, 0.0));
+  float d = grainHash(i + vec3(1.0, 1.0, 0.0));
+  float e = grainHash(i + vec3(0.0, 0.0, 1.0));
+  float f = grainHash(i + vec3(1.0, 0.0, 1.0));
+  float g = grainHash(i + vec3(0.0, 1.0, 1.0));
+  float h = grainHash(i + vec3(1.0, 1.0, 1.0));
+  float k1 = b - a;
+  float k2 = c - a;
+  float k3 = e - a;
+  float k4 = a - b - c + d;
+  float k5 = a - c - e + g;
+  float k6 = a - b - e + f;
+  float k7 = -a + b + c - d + e - f - g + h;
+  return 2.0 * du * vec3(k1 + k4 * u.y + k6 * u.z + k7 * u.y * u.z,
+                         k2 + k5 * u.z + k4 * u.x + k7 * u.z * u.x,
+                         k3 + k6 * u.x + k5 * u.y + k7 * u.x * u.y);
 }
 ${shader.fragmentShader.replace(
   '#include <normal_fragment_maps>',
   `#include <normal_fragment_maps>
   {
-    float gE = 0.08;
-    float g0 = grainBump(vGrainPos);
-    vec3 gG = vec3(grainBump(vGrainPos + vec3(gE, 0.0, 0.0)) - g0,
-                   grainBump(vGrainPos + vec3(0.0, gE, 0.0)) - g0,
-                   grainBump(vGrainPos + vec3(0.0, 0.0, gE)) - g0) / gE;
+    vec3 gG = grainSlope(vGrainPos);
     vec3 gV = gG.x * vGrainX + gG.y * vGrainY + gG.z * vGrainZ;
-    normal = normalize(normal - uGrainStrength * 0.25 * (gV - dot(gV, normal) * normal));
+    normal = normalize(normal - uGrainStrength * 0.15 * (gV - dot(gV, normal) * normal));
   }`,
 )}`;
   };
   const key = material.customProgramCacheKey?.bind(material);
-  material.customProgramCacheKey = () => `${key ? key() : ''}|grain:${size}:${strength}`;
+  material.customProgramCacheKey = () => `${key ? key() : ''}|grain4:${size}:${strength}`;
   material.needsUpdate = true;
 }
 
