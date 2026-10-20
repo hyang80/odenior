@@ -5,6 +5,7 @@ import KnotCursor from './components/KnotCursor.jsx';
 import ScentTrail from './components/ScentTrail.jsx';
 import Opening from './components/Opening.jsx';
 import SmoothScroll from './components/SmoothScroll.jsx';
+import ScrollProgress from './components/ScrollProgress.jsx';
 import Home from './pages/Home.jsx';
 import Brand from './pages/Brand.jsx';
 import ObjectStory from './pages/ObjectStory.jsx';
@@ -70,6 +71,7 @@ export default function App() {
         </Routes>
       </PageTransition>
       <SmoothScroll />
+      <ScrollProgress />
       <Opening />
       <ScentTrail />
       <KnotCursor />

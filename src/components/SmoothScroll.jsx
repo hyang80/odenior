@@ -26,6 +26,14 @@ export function glideToTop() {
   else window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+/** Glide to `y`, taking longer for longer trips (scroll progress chapter marks). */
+export function glideTo(y) {
+  const d = Math.abs(y - window.scrollY) / Math.max(1, window.innerHeight);
+  const duration = Math.min(2.2, Math.max(0.9, 0.7 + d * 0.35));
+  if (instance) instance.scrollTo(y, { duration });
+  else window.scrollTo({ top: y, behavior: 'smooth' });
+}
+
 /** Jump straight to `y` (no glide), e.g. to land on a section right after a route change. */
 export function jumpTo(y) {
   instance?.scrollTo(y, { immediate: true, force: true });

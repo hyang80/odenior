@@ -298,3 +298,73 @@ html.lenis body {
   transition-duration: 1ms;
   transition-behavior: allow-discrete;
 }
+
+/* Scroll progress (ScrollProgress.jsx) — 3px beige line along the bottom edge; softer at rest,
+   firmer while scrolling. Chapter marks (data-progress-label) sit above it as a small outlined
+   ring + label (like the showcase tags); the current one is highlighted. Above the page, below
+   the opening and the cursor. */
+.scroll-progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  z-index: 120;
+  pointer-events: none;
+  background: rgba(217, 186, 155, 0.3);
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+.scroll-progress[data-visible='true'] {
+  opacity: 0.75;
+}
+/* not clickable while hidden at the top of the page */
+.scroll-progress:not([data-visible='true']) .scroll-progress-mark {
+  pointer-events: none;
+}
+.scroll-progress:hover,
+.scroll-progress[data-visible='true'][data-active='true'] {
+  opacity: 1;
+  transition-duration: 200ms;
+}
+.scroll-progress-bar {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #e3cdb6, #c4a283);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: 0 50%;
+}
+.scroll-progress-mark {
+  position: absolute;
+  bottom: 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  color: #c9b4a1;
+  white-space: nowrap;
+  transition: color 400ms ease;
+}
+.scroll-progress-mark.is-start { transform: none; }
+.scroll-progress-mark.is-end { transform: translateX(-100%); }
+.spm-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  transition: background-color 400ms ease;
+}
+.scroll-progress-mark.is-past { color: #b89c84; }
+.scroll-progress-mark:hover,
+.scroll-progress-mark.is-current {
+  color: #8c7565;
+}
+.scroll-progress-mark.is-current { font-weight: 600; }
+.scroll-progress-mark.is-current .spm-dot { background: currentColor; }

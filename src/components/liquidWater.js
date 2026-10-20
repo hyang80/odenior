@@ -42,7 +42,10 @@ const SETTLE = 1.4; // s — how long the surface detail takes to calm down
 const spring = ({ f, zeta }) => ({ w2: (2 * Math.PI * f) ** 2, c: 2 * zeta * 2 * Math.PI * f });
 const soft = (v, lim) => lim * Math.tanh(v / lim);
 
-export function attachLiquidWater(mv, { material, fill = 0.82, surface = [0.78, 0.74, 0.66] }) {
+// `getUp` (optional): returns the direction that should read as "up" (scene space) each frame, for bottles shown
+// tilted (e.g. the canvas rotated with CSS) so the surface stays level on screen. `react` scales how
+// much camera motion stirs the liquid (1 = dragging by hand).
+export function attachLiquidWater(mv, { material, fill = 0.82, surface = [0.78, 0.74, 0.66], getUp, react = 1 }) {
   const sceneKey = Object.getOwnPropertySymbols(mv).find((k) => k.description === 'scene');
   const scene = sceneKey && mv[sceneKey];
   let mesh = null;
@@ -73,6 +76,7 @@ export function attachLiquidWater(mv, { material, fill = 0.82, surface = [0.78, 
     uLiqK: { value: 1 },
     uLiqTime: { value: 0 },
     uLiqEye: { value: [0, 1, 1] }, // camera position in the liquid's model space
+    uLiqUp: { value: [0, 1, 0] }, // world up in model space (the surface is level to it)
     uLiqSurface: { value: surface },
     uLiqMinY: { value: 0 },
     uLiqH: { value: 1 },
@@ -95,7 +99,7 @@ export function attachLiquidWater(mv, { material, fill = 0.82, surface = [0.78, 
     shader.fragmentShader = `varying vec3 vLiqPos;
 uniform float uLiqD; uniform vec2 uLiqC; uniform vec2 uLiqR; uniform vec2 uLiqM1; uniform vec2 uLiqM1Lag;
 uniform vec2 uLiqM2; uniform float uLiqM3; uniform float uLiqRip; uniform float uLiqChop; uniform float uLiqAgit;
-uniform vec2 uLiqDir; uniform float uLiqK; uniform float uLiqTime; uniform vec3 uLiqEye;
+uniform vec2 uLiqDir; uniform float uLiqK; uniform float uLiqTime; uniform vec3 uLiqEye; uniform vec3 uLiqUp;
 uniform vec3 uLiqSurface; uniform float uLiqMinY; uniform float uLiqH;
 float liqHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float liqNoise(vec2 p) {
@@ -124,7 +128,8 @@ ${shader.fragmentShader
   .replace(
     'void main() {',
     `void main() {
-  float liqAbove = vLiqPos.y - uLiqD - liqHeight(vLiqPos.xz);
+  vec3 liqP0 = vec3(uLiqC.x, uLiqD, uLiqC.y);
+  float liqAbove = dot(vLiqPos - liqP0, uLiqUp) - liqHeight(vLiqPos.xz);
   if (liqAbove > 0.0) discard;`,
   )
   .replace(
@@ -135,21 +140,24 @@ ${shader.fragmentShader
   if (!gl_FrontFacing) {
     // trace the view ray to the moving surface, then light it from its slope
     vec3 liqRay = vLiqPos - uLiqEye;
-    float liqDy = abs(liqRay.y) < 1e-5 ? 1e-5 : liqRay.y;
-    vec2 liqS = vLiqPos.xz;
-    float liqT = (uLiqD - uLiqEye.y) / liqDy;
+    float liqDy = dot(liqRay, uLiqUp);
+    liqDy = abs(liqDy) < 1e-5 ? 1e-5 : liqDy;
+    float liqE0 = dot(uLiqEye - liqP0, uLiqUp);
+    vec3 liqS3 = vLiqPos;
+    float liqT = -liqE0 / liqDy;
     for (int i = 0; i < 3; i++) {
-      liqS = uLiqEye.xz + liqRay.xz * liqT;
-      liqT = (uLiqD + liqHeight(liqS) - uLiqEye.y) / liqDy;
+      liqS3 = uLiqEye + liqRay * liqT;
+      liqT = (liqHeight(liqS3.xz) - liqE0) / liqDy;
     }
-    liqS = uLiqEye.xz + liqRay.xz * liqT;
+    liqS3 = uLiqEye + liqRay * liqT;
+    vec2 liqS = liqS3.xz;
     float liqE = max(uLiqR.x, uLiqR.y) * 0.03;
     float liqH0 = liqHeight(liqS);
     vec2 liqG = vec2(liqHeight(liqS + vec2(liqE, 0.0)) - liqH0, liqHeight(liqS + vec2(0.0, liqE)) - liqH0) / liqE;
-    vec3 liqN = normalize(vec3(-liqG.x * 3.0, 1.0, -liqG.y * 3.0));
-    vec3 liqV = normalize(uLiqEye - vec3(liqS.x, uLiqD + liqH0, liqS.y));
+    vec3 liqN = normalize(uLiqUp + vec3(-liqG.x * 3.0, 0.0, -liqG.y * 3.0));
+    vec3 liqV = normalize(uLiqEye - liqS3);
     vec3 liqL = normalize(vec3(0.35, 1.0, 0.45));
-    float liqDiff = dot(liqN, liqL) - dot(vec3(0.0, 1.0, 0.0), liqL);
+    float liqDiff = dot(liqN, liqL) - dot(uLiqUp, liqL);
     float liqSpec = pow(max(dot(reflect(-liqL, liqN), liqV), 0.0), 40.0);
     float liqLift = 0.18 + 0.5 * liqDiff + 0.22 * liqSpec;
     gl_FragColor = vec4(mix(uLiqSurface, vec3(1.0), clamp(liqLift, 0.06, 0.45)), gl_FragColor.a);
@@ -168,7 +176,7 @@ ${shader.fragmentShader
   }`,
   )}`;
   };
-  mat.customProgramCacheKey = () => 'odenior-liquid-water-9';
+  mat.customProgramCacheKey = () => 'odenior-liquid-water-10';
   mat.needsUpdate = true;
 
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -228,7 +236,7 @@ ${shader.fragmentShader
       const af = [(wNew[0] - wf[0]) / dt, (wNew[1] - wf[1]) / dt];
       wf = wNew;
       // water lags the vessel: pushed against the change in motion, plus a lean while turning
-      const force = [0, 1].map((i) => -(ACCEL * af[i] + DRAG * wf[i]) * s1.w2 * 0.22);
+      const force = [0, 1].map((i) => -(ACCEL * af[i] + DRAG * wf[i]) * s1.w2 * 0.22 * react);
       const sub = 4;
       for (let i = 0; i < sub; i++) {
         step(m1, s1, force, dt / sub);
@@ -266,6 +274,15 @@ ${shader.fragmentShader
       mesh.updateWorldMatrix(true, false);
       mesh.worldToLocal(eye);
       uniforms.uLiqEye.value = [eye.x, eye.y, eye.z];
+    }
+    const up = getUp?.();
+    if (up && eye) {
+      // world direction → the liquid mesh's own space
+      const o = mesh.worldToLocal(eye.set(0, 0, 0)).toArray();
+      const d = mesh.worldToLocal(eye.set(up[0], up[1], up[2])).toArray();
+      const v = [d[0] - o[0], d[1] - o[1], d[2] - o[2]];
+      const l = Math.hypot(v[0], v[1], v[2]) || 1;
+      uniforms.uLiqUp.value = [v[0] / l, v[1] / l, v[2] / l];
     }
     scene.queueRender?.();
     raf = requestAnimationFrame(tick);

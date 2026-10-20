@@ -1,12 +1,14 @@
-/* ===== HOW TO USE (Figma 1:375 "Frame 90", 1440×2217) ===== */
+/* ===== HOW TO USE (Figma 1:375 "Frame 90", 1440×4543) ===== */
 .page-howto {
   background: #fff;
 }
 .howto-main {
-  height: calc(1853px * var(--zoom));
+  height: calc(4179px * var(--zoom));
+  /* clip, not hidden: hidden would make this the scroll container and break the sticky stage */
+  overflow: clip;
 }
 .howto-canvas {
-  height: 1853px;
+  height: 4179px;
 }
 
 /* Frame 84 (1440×448 @ 0,133) */
@@ -44,25 +46,130 @@
 .howto-intro.is-active .howto-logo { top: 79px; }
 .howto-intro.is-active .howto-heading { top: 189px; }
 
+/* 170:1093–1095 — oversized words behind the steps */
+.howto-word {
+  left: 719px;
+  transform: translateX(-50%);
+  font-size: 250px;
+  line-height: 272px;
+  font-weight: 600;
+  letter-spacing: 12.5px;
+  color: #f7f5f1;
+  opacity: 0.54;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.howto-word-1 { top: 869px; }
+.howto-word-2 { top: 1973px; }
+.howto-word-3 { top: 3196px; left: 719.5px; }
+
+/* Step copy (1:379–1:381) — rides on the pinned stage with its bottle, vertically centred;
+   HowToUse.jsx fades and drifts it with the hand-over. `left` comes from the step data. */
+.howto-stage-canvas {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1440px;
+  height: calc(100vh / var(--zoom));
+  margin-left: -720px;
+  zoom: var(--zoom);
+}
 .howto-step {
+  position: absolute;
+  top: 50%;
   font-size: 22px;
+  line-height: 54px;
   font-weight: 500;
   color: #000;
   white-space: nowrap;
+  visibility: hidden;
+  will-change: transform, opacity;
 }
-.howto-step-1 { left: 129px; top: 895px; color: #39312b; }
-.howto-step-2 { left: 132px; top: 1166px; }
-.howto-step-3 { left: 136px; top: 1433px; }
-.howto-step-1 .fw-600,
-.howto-step-1 .lh54 { line-height: 54px; }
-.lh54 { line-height: 54px; }
-.lh41 { line-height: 41px; }
-.lh28 { line-height: 28px; }
+.hs-label {
+  margin-bottom: 108px;
+}
+.hs-gap {
+  height: 54px;
+}
+.howto-step-1 {
+  line-height: 41px;
+  color: #39312b;
+}
+.howto-step-1 .hs-label {
+  font-weight: 600;
+  line-height: 54px;
+}
+.hs-mobile-img {
+  display: none;
+}
+/* zero-size chapter marks at each bottle's centre (data-progress-label) */
+.howto-anchor {
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
 
-/* Caution block (#f7f2ed, 364px) */
+/* Pinned 3D stage: pinned while the middle of the screen runs from the first bottle's centre
+   (design y 1202) to the last one's (3420); HowToUse.jsx places, leans, turns and swaps the bottles */
+.howto-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(1202px * var(--zoom) - 50vh);
+  /* first bottle's centre → last one's + its 300px exit (EXIT) */
+  height: calc(2518px * var(--zoom) + 100vh);
+  z-index: 1;
+  pointer-events: none;
+}
+.howto-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+.howto-bottle {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: calc(411px * var(--zoom));
+  height: calc(697px * var(--zoom));
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  visibility: hidden;
+}
+
+/* Caution block (#f7f2ed, 364px) — the beige washes in from white and the lines rise in one
+   after another once it is in view */
 .howto-caution {
   height: calc(364px * var(--zoom));
+  background: #fff;
+  transition: background-color 1400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.howto-caution.is-seen {
   background: #f7f2ed;
+}
+.caution-col p {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(4px);
+  transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1), transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.is-seen .caution-col p {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+.is-seen .caution-col p:nth-child(1) { transition-delay: 200ms; }
+.is-seen .caution-col p:nth-child(2) { transition-delay: 320ms; }
+.is-seen .caution-col p:nth-child(3) { transition-delay: 440ms; }
+.is-seen .caution-col p:nth-child(4) { transition-delay: 560ms; }
+.is-seen .caution-col p:nth-child(5) { transition-delay: 680ms; }
+@media (prefers-reduced-motion: reduce) {
+  .howto-caution { background: #f7f2ed; transition: none; }
+  .caution-col p { opacity: 1; transform: none; filter: none; transition: none; }
 }
 .howto-caution-canvas {
   height: 364px;
@@ -76,7 +183,10 @@
 }
 .caution-left { left: 86px; }
 .caution-right { left: 748px; }
+.lh54 { line-height: 54px; }
+.lh28 { line-height: 28px; }
 
+/* Mobile: no pinned 3D stage — the steps flow, each with its bottle photo above the copy */
 @media (max-width: 899px) {
   .howto-main,
   .howto-canvas,
@@ -84,16 +194,38 @@
   .howto-caution-canvas {
     height: auto;
   }
-  .howto-canvas {
-    padding: 100px 20px 80px;
+  .howto-word,
+  .howto-anchor,
+  .howto-bottle {
+    display: none;
+  }
+  .howto-track,
+  .howto-stage,
+  .howto-stage-canvas {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    zoom: 1;
+  }
+  .howto-stage-canvas {
+    padding: 0 20px 80px;
     display: flex;
     flex-direction: column;
-    gap: 56px;
+    gap: 72px;
+  }
+  .howto-step {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .howto-canvas {
+    padding: 100px 20px 72px;
   }
   .howto-intro,
   .howto-step {
     position: relative;
-    left: auto;
+    left: auto !important;
     top: auto;
     width: 100%;
   }
@@ -102,10 +234,16 @@
   .howto-heading { left: 0; top: 160px; font-size: 22px; line-height: 34px; white-space: normal; }
   .howto-intro.is-active .howto-logo { top: 0; }
   .howto-intro.is-active .howto-heading { top: 90px; }
-  .howto-step { font-size: 16px; white-space: normal; }
-  .howto-step .pre { white-space: normal; }
-  .howto-step .lh54 { line-height: 32px; }
-  .howto-step .lh41 { line-height: 30px; }
+  .howto-step { font-size: 16px; line-height: 28px; white-space: normal; }
+  .howto-step-1 { line-height: 28px; }
+  .hs-label { margin-bottom: 16px; }
+  .howto-step-1 .hs-label { line-height: 28px; }
+  .hs-gap { height: 16px; }
+  .hs-mobile-img {
+    display: block;
+    width: 60%;
+    margin: 0 auto 28px;
+  }
   .howto-caution-canvas {
     padding: 48px 20px;
     display: flex;

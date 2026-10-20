@@ -37,7 +37,7 @@ const bottleMaterials = (cap, capExtra = {}) => ({
 // the differently sized knots made the (identical) glass bottles render at different sizes and
 // heights. Same slot + same camera → same glass size and height in every variant.
 const SLOT = { left: 561, top: 72, width: 411, height: 697 };
-const FRAMING = { target: '-0.0006m 0.011m 0m', radius: '0.2722m', fov: '36.81deg' }; // AiEULE's auto values
+export const FRAMING = { target: '-0.0006m 0.011m 0m', radius: '0.2722m', fov: '36.81deg' }; // AiEULE's auto values
 // The liquid fills 82% of the bottle and sloshes like water when the bottle is dragged (liquidWater.js)
 const LIQUID = { material: 'Material.006', fill: 0.82, style: 'water' };
 
