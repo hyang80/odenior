@@ -432,7 +432,8 @@ export default function PerfumeModel({
   // each model's own bounds (and with zoom disabled it pins it to its auto value unless min = max
   // are set), so one `field-of-view` still renders differently sized knots at slightly different
   // scales. Once the model is in, pin min = max = request and nudge it until the camera's
-  // effective FOV is exactly framing.fov.
+  // effective FOV is exactly framing.fov. A viewer kept out of the layout (display: none, e.g. the
+  // stacked bottles that aren't showing) has no camera updates, so it calibrates once it shows.
   const fovTarget = framing ? parseFloat(framing.fov) : null;
   useEffect(() => {
     const mv = viewerRef.current;
@@ -441,6 +442,7 @@ export default function PerfumeModel({
     let tries = 0;
     let requested = fovTarget;
     const calibrate = () => {
+      if (!mv.clientWidth) return; // not laid out: the resize observer restarts it on showing
       const got = mv.getFieldOfView();
       if (Math.abs(got - fovTarget) < 0.005 || tries++ > 6) return;
       requested *= fovTarget / got;
@@ -456,9 +458,17 @@ export default function PerfumeModel({
     };
     if (mv.loaded) start();
     mv.addEventListener('load', start);
+    let shown = mv.clientWidth > 0;
+    const ro = new ResizeObserver(() => {
+      const now = mv.clientWidth > 0;
+      if (now && !shown && mv.loaded) start();
+      shown = now;
+    });
+    ro.observe(mv);
     return () => {
       cancelAnimationFrame(raf);
       mv.removeEventListener('load', start);
+      ro.disconnect();
     };
   }, [ready, fovTarget]);
 
