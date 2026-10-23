@@ -34,6 +34,11 @@
 .series-variant.is-active {
   visibility: visible;
 }
+/* the inactive bottles leave the layout: model-viewer would otherwise keep rendering (and in
+   Safari, slowly copying) every viewer it counts as on screen */
+.series-variant:not(.is-active) .series-model {
+  display: none;
+}
 /* Photo slot: <model-viewer> (PerfumeModel) in place of the bottle photo */
 /* The canvas is 1.4× the slot (centred) and the camera sits 1.4× further back (PerfumeModel
    radius 120% vs 86%), so the bottle keeps the slot's size but has room to tilt without clipping */

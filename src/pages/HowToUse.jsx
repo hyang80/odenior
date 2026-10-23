@@ -201,7 +201,9 @@ export default function HowToUse() {
         const op = smooth(show).toFixed(3);
         const vis = show > 0.001 ? 'visible' : 'hidden';
         box.style.opacity = op;
-        box.style.visibility = vis;
+        // out of the layout when gone (not just invisible): model-viewer keeps rendering — and, with
+        // several "on screen", copying — every viewer it thinks is visible, which drags in Safari
+        box.style.display = show > 0.001 ? 'block' : 'none';
         box.style.transform = `translate(${((x - BOX.width / 2) * z).toFixed(2)}px, calc(-50% + ${(move * DRIFT * z).toFixed(2)}px)) rotate(${tilt.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
         copy.style.opacity = op;
         copy.style.visibility = vis;

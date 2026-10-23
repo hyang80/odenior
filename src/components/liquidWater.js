@@ -276,19 +276,28 @@ ${shader.fragmentShader
       uniforms.uLiqEye.value = [eye.x, eye.y, eye.z];
     }
     const up = getUp?.();
+    let turned = false;
     if (up && eye) {
       // world direction → the liquid mesh's own space
       const o = mesh.worldToLocal(eye.set(0, 0, 0)).toArray();
       const d = mesh.worldToLocal(eye.set(up[0], up[1], up[2])).toArray();
       const v = [d[0] - o[0], d[1] - o[1], d[2] - o[2]];
       const l = Math.hypot(v[0], v[1], v[2]) || 1;
-      uniforms.uLiqUp.value = [v[0] / l, v[1] / l, v[2] / l];
+      const nu = [v[0] / l, v[1] / l, v[2] / l];
+      const pu = uniforms.uLiqUp.value;
+      turned = Math.abs(nu[0] - pu[0]) + Math.abs(nu[1] - pu[1]) + Math.abs(nu[2] - pu[2]) > 1e-4;
+      uniforms.uLiqUp.value = nu;
     }
-    // keep redrawing only while the bottle can be seen (stacked variants / stage bottles are
-    // hidden with visibility or opacity 0 — drawing them anyway costs a full frame each)
-    if (!mv.checkVisibility || mv.checkVisibility({ opacityProperty: true, visibilityProperty: true })) {
-      scene.queueRender?.();
-    }
+    // redraw only while the liquid is actually moving (camera moves redraw on their own), and
+    // only while the bottle can be seen (stacked variants / stage bottles are hidden with
+    // visibility or opacity 0 — drawing them anyway costs a full frame each)
+    const moving =
+      agit > 0.01 ||
+      turned ||
+      Math.abs(m1.p[0]) + Math.abs(m1.p[1]) + Math.abs(m1.v[0]) + Math.abs(m1.v[1]) > 2e-3 ||
+      Math.abs(m2.p[0]) + Math.abs(m2.p[1]) + Math.abs(m3.p[0]) > 2e-3;
+    const seen = !mv.checkVisibility || mv.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+    if (moving && seen) scene.queueRender?.();
     raf = requestAnimationFrame(tick);
   };
   raf = requestAnimationFrame(tick);

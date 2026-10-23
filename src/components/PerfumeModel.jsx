@@ -329,6 +329,23 @@ function addNeckPlug(mesh, { radius, height, segments = 48 }) {
   mesh.add(plug);
 }
 
+// model-viewer renders at the full device pixel ratio (4× the pixels on a Retina screen), which
+// Safari's WebGL can't keep up with for these glass/liquid shaders. Cap what scripts see: the
+// bottles render at 1.5× — still crisp — and nothing else on the page reads it for layout.
+const MAX_DPR = 1.5;
+if (typeof window !== 'undefined' && window.devicePixelRatio > MAX_DPR) {
+  const real = Object.getOwnPropertyDescriptor(Window.prototype, 'devicePixelRatio')
+    ?? Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
+  try {
+    Object.defineProperty(window, 'devicePixelRatio', {
+      configurable: true,
+      get: () => Math.min(MAX_DPR, real?.get ? real.get.call(window) : 1),
+    });
+  } catch {
+    /* read-only in this browser: keep the native ratio */
+  }
+}
+
 export default function PerfumeModel({
   src,
   poster,
@@ -481,6 +498,7 @@ export default function PerfumeModel({
       src={src}
       poster={poster}
       alt={alt}
+      loading="eager"
       camera-controls={still ? undefined : ''}
       disable-zoom=""
       disable-pan=""
